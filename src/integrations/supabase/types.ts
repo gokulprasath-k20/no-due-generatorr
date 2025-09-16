@@ -14,7 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      marks: {
+        Row: {
+          created_at: string
+          iat1: number | null
+          iat2: number | null
+          id: string
+          model: number | null
+          student_id: string
+          subject: string
+        }
+        Insert: {
+          created_at?: string
+          iat1?: number | null
+          iat2?: number | null
+          id?: string
+          model?: number | null
+          student_id: string
+          subject: string
+        }
+        Update: {
+          created_at?: string
+          iat1?: number | null
+          iat2?: number | null
+          id?: string
+          model?: number | null
+          student_id?: string
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marks_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      students: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          register_number: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          register_number: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          register_number?: string
+          year?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
