@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from '@/hooks/use-toast';
 import { api } from '@/utils/supabase-api';
 import { Student, Mark, SUBJECTS_BY_YEAR } from '@/types';
+import { Layout } from './Layout';
 import { Loader2, Search, UserPlus, Save, LogOut } from 'lucide-react';
 
 interface AdminPanelProps {
@@ -25,6 +26,16 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   const [newStudentName, setNewStudentName] = useState('');
   const [newStudentRegNo, setNewStudentRegNo] = useState('');
   const [newStudentYear, setNewStudentYear] = useState<string>('');
+  const [newStudentDept, setNewStudentDept] = useState<string>('');
+  
+  const DEPARTMENTS = [
+    'Computer Science and Engineering',
+    'Information Technology',
+    'Electronics and Communication Engineering',
+    'Electrical and Electronics Engineering',
+    'Mechanical Engineering',
+    'Civil Engineering'
+  ];
 
   const searchStudent = async () => {
     if (!searchRegNo.trim()) {
@@ -72,37 +83,43 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
     }
   };
 
-  const createStudent = async () => {
-    if (!newStudentName.trim() || !newStudentRegNo.trim() || !newStudentYear) {
+  const handleCreateStudent = async () => {
+    if (!newStudentName.trim() || !newStudentRegNo.trim() || !newStudentYear || !newStudentDept) {
       toast({
         title: "Error",
-        description: "Please fill all fields",
+        description: "Please fill in all fields",
         variant: "destructive"
       });
       return;
     }
 
-    setLoading(true);
     try {
-      const newStudent = await api.createStudent(newStudentName, newStudentRegNo, parseInt(newStudentYear));
-      const { marks: newMarks } = await api.getStudentByRegNo(newStudentRegNo);
-      
-      setStudent(newStudent);
-      setMarks(newMarks);
-      setShowNewStudent(false);
-      setNewStudentName('');
-      setNewStudentRegNo('');
-      setNewStudentYear('');
+      await api.createStudent(
+        newStudentName.trim(),
+        newStudentRegNo.trim(),
+        parseInt(newStudentYear),
+        newStudentDept
+      );
       
       toast({
         title: "Success",
-        description: "Student created successfully",
+        description: "Student created successfully"
       });
+      
+      // Reset form and hide
+      setNewStudentName('');
+      setNewStudentRegNo('');
+      setNewStudentYear('');
+      setNewStudentDept('');
+      setShowNewStudent(false);
+      
+      // Refresh student list or search
+      await searchStudent();
     } catch (error) {
       console.error('Error creating student:', error);
       toast({
         title: "Error",
-        description: "Failed to create student",
+        description: error instanceof Error ? error.message : "Failed to create student",
         variant: "destructive"
       });
     } finally {
@@ -171,7 +188,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
+    <Layout>
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
@@ -234,20 +251,37 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                     placeholder="Enter register number"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="year">Year</Label>
-                  <Select value={newStudentYear} onValueChange={setNewStudentYear}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select year" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="2">2nd Year</SelectItem>
-                      <SelectItem value="3">3rd Year</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="new-student-year">Year</Label>
+                    <Select value={newStudentYear} onValueChange={setNewStudentYear}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select year" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="2">2nd Year</SelectItem>
+                        <SelectItem value="3">3rd Year</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="new-student-dept">Department</Label>
+                    <Select value={newStudentDept} onValueChange={setNewStudentDept}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select department" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DEPARTMENTS.map((dept) => (
+                          <SelectItem key={dept} value={dept}>
+                            {dept}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
-              <Button onClick={createStudent} disabled={loading}>
+              <Button onClick={handleCreateStudent} disabled={loading}>
                 {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
                 Create Student
               </Button>
@@ -328,7 +362,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
             </CardContent>
           </Card>
         )}
-      </div>
-    </div>
+        </div>
+    </Layout>
   );
 }

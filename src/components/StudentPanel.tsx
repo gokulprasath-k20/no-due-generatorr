@@ -6,7 +6,9 @@ import { toast } from '@/hooks/use-toast';
 import { api } from '@/utils/supabase-api';
 import { Student, Mark } from '@/types';
 import { CertificatePreview } from './CertificatePreview';
-import { Loader2, Search } from 'lucide-react';
+import { StudentRegistration } from './StudentRegistration';
+import { Layout } from './Layout';
+import { Loader2, Search, UserPlus } from 'lucide-react';
 
 export function StudentPanel() {
   const [registerNumber, setRegisterNumber] = useState('');
@@ -14,6 +16,7 @@ export function StudentPanel() {
   const [marks, setMarks] = useState<Mark[]>([]);
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showRegistration, setShowRegistration] = useState(false);
 
   const handleSearch = async () => {
     if (!registerNumber.trim()) {
@@ -64,55 +67,105 @@ export function StudentPanel() {
     setMarks([]);
   };
 
+  const handleRegistrationSuccess = (regNumber: string) => {
+    setRegisterNumber(regNumber);
+    setShowRegistration(false);
+    handleSearch();
+  };
+
+  const handleBackFromRegistration = () => {
+    setShowRegistration(false);
+  };
+
+  if (showRegistration) {
+    return (
+      <Layout>
+        <StudentRegistration 
+          onBack={handleBackFromRegistration} 
+          onRegistrationSuccess={handleRegistrationSuccess} 
+        />
+      </Layout>
+    );
+  }
+
   if (showPreview && student) {
-    return <CertificatePreview student={student} marks={marks} onBack={handleBack} />;
+    return (
+      <Layout showHeader={false}>
+        <CertificatePreview student={student} marks={marks} onBack={handleBack} />
+      </Layout>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="text-center space-y-2">
-          <div className="mx-auto w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mb-4">
-            <Search className="w-8 h-8 text-white" />
-          </div>
-          <CardTitle className="text-2xl font-bold text-gray-800">
-            No Due Certificate Generator
-          </CardTitle>
-          <p className="text-gray-600 text-sm">
-            Enter your register number to view and generate your certificate
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="register" className="text-sm font-medium text-gray-700">
-              Register Number
-            </label>
-            <Input
-              id="register"
-              type="text"
-              placeholder="Enter your register number"
-              value={registerNumber}
-              onChange={(e) => setRegisterNumber(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              className="text-center font-mono text-lg"
-            />
-          </div>
-          <Button 
-            onClick={handleSearch} 
-            className="w-full"
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Searching...
-              </>
-            ) : (
-              'View Certificate'
-            )}
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
+    <Layout>
+      {!showPreview && !showRegistration && (
+        <div className="flex items-center justify-center p-4">
+          <Card className="w-full max-w-md shadow-xl">
+            <CardHeader className="text-center space-y-2">
+              <div className="mx-auto w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mb-4">
+                <Search className="w-8 h-8 text-white" />
+              </div>
+              <CardTitle className="text-2xl font-bold text-gray-800">
+                No Due Certificate Generator
+              </CardTitle>
+              <p className="text-gray-600 text-sm">
+                Enter your register number to view and generate your certificate
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="register" className="text-sm font-medium text-gray-700">
+                  Register Number
+                </label>
+                <Input
+                  id="register"
+                  type="text"
+                  placeholder="Enter your register number"
+                  value={registerNumber}
+                  onChange={(e) => setRegisterNumber(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  className="text-center font-mono text-lg"
+                />
+              </div>
+              <Button 
+                onClick={handleSearch} 
+                className="w-full"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Searching...
+                  </>
+                ) : (
+                  'View Certificate'
+                )}
+              </Button>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    Or
+                  </span>
+                </div>
+              </div>
+              
+              <Button 
+                variant="outline"
+                onClick={() => setShowRegistration(true)}
+                className="w-full"
+              >
+                <UserPlus className="mr-2 h-4 w-4" />
+                New Student? Register Here
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+    </Layout>
   );
 }

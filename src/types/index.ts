@@ -2,6 +2,7 @@ export interface Student {
   id: string;
   name: string;
   register_number: string;
+  department?: string; // Made optional to handle existing records
   year: number;
   created_at: string;
 }
@@ -13,6 +14,7 @@ export interface Mark {
   iat1: number | null;
   iat2: number | null;
   model: number | null;
+  signed: boolean;
   created_at: string;
 }
 
