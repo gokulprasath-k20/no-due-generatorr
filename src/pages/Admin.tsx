@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { AdminLogin } from '@/components/AdminLogin';
 import { AdminPanel } from '@/components/AdminPanel';
+import { AdminDebug } from '@/components/AdminDebug';
 import { Layout } from '@/components/Layout';
 
 const Admin = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showDebug, setShowDebug] = useState(false);
 
   useEffect(() => {
     // Check if admin is already logged in (from localStorage)
@@ -50,10 +52,26 @@ const Admin = () => {
 
   return (
     <Layout>
-      {isLoggedIn ? (
-        <AdminPanel onLogout={handleLogout} />
+      {/* Debug Toggle */}
+      <div className="fixed top-4 right-4 z-50">
+        <button
+          onClick={() => setShowDebug(!showDebug)}
+          className="bg-red-500 text-white px-3 py-1 rounded text-sm"
+        >
+          {showDebug ? 'Hide Debug' : 'Show Debug'}
+        </button>
+      </div>
+
+      {showDebug ? (
+        <AdminDebug />
       ) : (
-        <AdminLogin onLoginSuccess={handleLoginSuccess} />
+        <>
+          {isLoggedIn ? (
+            <AdminPanel onLogout={handleLogout} />
+          ) : (
+            <AdminLogin onLoginSuccess={handleLoginSuccess} />
+          )}
+        </>
       )}
     </Layout>
   );
