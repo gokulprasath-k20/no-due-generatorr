@@ -9,6 +9,7 @@ export function AdminDebug() {
   const [envInfo, setEnvInfo] = useState<any>(null);
   const [supabaseTest, setSupabaseTest] = useState<string>('Not tested');
   const [authTest, setAuthTest] = useState<string>('Not tested');
+  const [studentTest, setStudentTest] = useState<string>('Not tested');
 
   useEffect(() => {
     setEnvInfo(getEnvironmentInfo());
@@ -17,9 +18,9 @@ export function AdminDebug() {
   const testSupabaseConnection = async () => {
     try {
       setSupabaseTest('Testing...');
-      const { data, error } = await supabase.from('students').select('count').limit(1);
+      const { data, error } = await supabase.from('students').select('id').limit(1);
       if (error) {
-        setSupabaseTest(`Error: ${error.message}`);
+        setSupabaseTest(`❌ Error: ${error.message}`);
       } else {
         setSupabaseTest('✅ Connection successful');
       }
@@ -38,11 +39,37 @@ export function AdminDebug() {
     }
   };
 
+  const testStudentSearch = async () => {
+    try {
+      setStudentTest('Testing...');
+      // Test with a sample register number - this will likely fail but show us the error
+      const result = await api.getStudentByRegNo('TEST123');
+      if (result.student) {
+        setStudentTest('✅ Student search works');
+      } else {
+        setStudentTest('✅ Student search works (no student found)');
+      }
+    } catch (error) {
+      setStudentTest(`❌ Student search error: ${error}`);
+    }
+  };
+
+  const runAllTests = async () => {
+    testAdminAuth();
+    await testSupabaseConnection();
+    await testStudentSearch();
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>🔧 Admin Panel Debug Information</CardTitle>
+          <CardTitle className="flex items-center justify-between">
+            🔧 Admin Panel Debug Information
+            <Button onClick={runAllTests} variant="outline" size="sm">
+              Run All Tests
+            </Button>
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           
@@ -73,6 +100,17 @@ export function AdminDebug() {
                 Test Auth
               </Button>
               <span className="text-sm">{authTest}</span>
+            </div>
+          </div>
+
+          {/* Student Search Test */}
+          <div>
+            <h3 className="font-semibold mb-2">Student Search API</h3>
+            <div className="flex items-center gap-2">
+              <Button onClick={testStudentSearch} size="sm">
+                Test Student Search
+              </Button>
+              <span className="text-sm">{studentTest}</span>
             </div>
           </div>
 
