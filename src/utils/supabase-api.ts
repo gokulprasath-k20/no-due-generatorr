@@ -1,5 +1,5 @@
-import { supabase } from "@/integrations/supabase/client";
-import { Student, Mark, SUBJECTS_BY_YEAR } from "@/types";
+import { supabase } from '@/integrations/supabase/client';
+import { Student, Mark, SUBJECTS_BY_YEAR, getSubjectsForYearSem } from '@/types';
 
 export const api = {
   // Student functions
@@ -102,7 +102,7 @@ export const api = {
   },
 
   // Admin functions
-  async createStudent(name: string, registerNumber: string, year: number, department: string): Promise<Student> {
+  async createStudent(name: string, registerNumber: string, year: number, department: string, semester?: number): Promise<Student> {
     try {
       const { data, error } = await supabase
         .from('students')
@@ -110,7 +110,8 @@ export const api = {
           name, 
           register_number: registerNumber, 
           year,
-          department
+          department,
+          semester
         }])
         .select()
         .single();
@@ -120,8 +121,8 @@ export const api = {
         throw new Error(`Database error: ${error.message}`);
       }
 
-      // Create empty marks for all subjects of the year
-      const subjects = SUBJECTS_BY_YEAR[year as keyof typeof SUBJECTS_BY_YEAR];
+      // Create empty marks for all subjects of the year and semester
+      const subjects = getSubjectsForYearSem(year, semester);
       const marksToInsert = subjects.map(subject => ({
         student_id: data.id,
         subject,

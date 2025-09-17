@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Student, Mark, SUBJECTS_BY_YEAR } from '@/types';
+import { Student, Mark, SUBJECTS_BY_YEAR, getSubjectsForYearSem } from '@/types';
 import { Layout } from './Layout';
 import { ArrowLeft, Download, Printer } from 'lucide-react';
 import html2canvas from 'html2canvas';
@@ -17,7 +17,7 @@ interface CertificatePreviewProps {
 }
 
 export function CertificatePreview({ student, marks, onBack }: CertificatePreviewProps) {
-  const subjects = SUBJECTS_BY_YEAR[student.year as keyof typeof SUBJECTS_BY_YEAR];
+  const subjects = getSubjectsForYearSem(student.year, student.semester);
   
   // Check if any subject needs marks columns (IAT1, IAT2, Model)
   const hasAnyMarksColumns = subjects.some(subject => getSubjectColumnConfig(subject).showMarks);

@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { api } from '@/utils/supabase-api';
-import { Student, Mark, SUBJECTS_BY_YEAR } from '@/types';
+import { Student, Mark, SUBJECTS_BY_YEAR, getSubjectsForYearSem } from '@/types';
 import { Layout } from './Layout';
 import { Loader2, Search, UserPlus, Save, LogOut } from 'lucide-react';
 import { shouldShowMarksColumns } from '@/utils/subject-config';
@@ -27,6 +27,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   const [newStudentName, setNewStudentName] = useState('');
   const [newStudentRegNo, setNewStudentRegNo] = useState('');
   const [newStudentYear, setNewStudentYear] = useState<string>('');
+  const [newStudentSem, setNewStudentSem] = useState<string>('');
   const [newStudentDept, setNewStudentDept] = useState<string>('');
   
   const DEPARTMENTS = [
@@ -85,10 +86,10 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   };
 
   const handleCreateStudent = async () => {
-    if (!newStudentName.trim() || !newStudentRegNo.trim() || !newStudentYear || !newStudentDept) {
+    if (!newStudentName.trim() || !newStudentRegNo.trim() || !newStudentYear || !newStudentSem || !newStudentDept) {
       toast({
         title: "Error",
-        description: "Please fill in all fields",
+        description: "Please fill in all fields including semester",
         variant: "destructive"
       });
       return;
@@ -99,7 +100,8 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
         newStudentName.trim(),
         newStudentRegNo.trim(),
         parseInt(newStudentYear),
-        newStudentDept
+        newStudentDept,
+        parseInt(newStudentSem)
       );
       
       toast({
@@ -111,6 +113,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
       setNewStudentName('');
       setNewStudentRegNo('');
       setNewStudentYear('');
+      setNewStudentSem('');
       setNewStudentDept('');
       setShowNewStudent(false);
       
@@ -146,6 +149,9 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
           iat1: field === 'iat1' ? numValue : null,
           iat2: field === 'iat2' ? numValue : null,
           model: field === 'model' ? numValue : null,
+          signed: false,
+          assignmentSubmitted: false,
+          departmentFine: 0,
           created_at: new Date().toISOString()
         }];
       }
@@ -252,16 +258,38 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                     placeholder="Enter register number"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="new-student-year">Year</Label>
-                    <Select value={newStudentYear} onValueChange={setNewStudentYear}>
+                    <Select value={newStudentYear} onValueChange={(value) => {
+                      setNewStudentYear(value);
+                      setNewStudentSem(''); // Reset semester when year changes
+                    }}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select year" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="2">2nd Year</SelectItem>
                         <SelectItem value="3">3rd Year</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="new-student-sem">Semester</Label>
+                    <Select value={newStudentSem} onValueChange={setNewStudentSem} disabled={!newStudentYear}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select semester" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {newStudentYear === '2' && (
+                          <>
+                            <SelectItem value="3">3rd Semester</SelectItem>
+                            <SelectItem value="4">4th Semester</SelectItem>
+                          </>
+                        )}
+                        {newStudentYear === '3' && (
+                          <SelectItem value="5">5th Semester</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -295,7 +323,10 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
           <Card>
             <CardHeader>
               <CardTitle>Student: {student.name} ({student.register_number})</CardTitle>
-              <p className="text-muted-foreground">Year: {student.year === 2 ? '2nd' : '3rd'}</p>
+              <p className="text-muted-foreground">
+                Year: {student.year === 2 ? '2nd' : '3rd'} 
+                {student.semester && ` | Semester: ${student.semester}`}
+              </p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="overflow-x-auto">
@@ -310,7 +341,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                     </tr>
                   </thead>
                   <tbody>
-                    {SUBJECTS_BY_YEAR[student.year as keyof typeof SUBJECTS_BY_YEAR].map((subject) => {
+                    {getSubjectsForYearSem(student.year, student.semester).map((subject) => {
                       const showMarks = shouldShowMarksColumns(subject);
                       return (
                         <tr key={subject}>
