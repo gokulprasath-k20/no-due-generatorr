@@ -20,8 +20,27 @@ export function CertificatePreview({ student, marks, onBack }: CertificatePrevie
   
   const getMarkForSubject = (subject: string) => {
     const mark = marks.find(mark => mark.subject === subject);
-    // Ensure the mark has a signed property with a default of false if not present
-    return mark ? { ...mark, signed: mark.signed ?? false } : undefined;
+    // Create a default mark object if not found
+    if (!mark) {
+      return {
+        id: '',
+        student_id: '',
+        subject,
+        iat1: null,
+        iat2: null,
+        model: null,
+        signed: null,
+        assignmentSubmitted: null,
+        departmentFine: 0,
+        created_at: new Date().toISOString()
+      };
+    }
+    // Ensure all required fields are present
+    return {
+      ...mark,
+      assignmentSubmitted: mark.assignmentSubmitted ?? false,
+      departmentFine: mark.departmentFine ?? 0
+    };
   };
 
   const handlePrint = () => {
@@ -149,31 +168,55 @@ export function CertificatePreview({ student, marks, onBack }: CertificatePrevie
 
   return (
     <Layout showHeader={false}>
-      <div className="max-w-4xl mx-auto space-y-4 print:max-w-none print:space-y-0 print:bg-white">
-        {/* Control buttons */}
-        <div className="flex gap-2 no-print">
+      <div className="container mx-auto p-4">
+        {/* College Header Image */}
+        <div className="mb-6 w-full">
+          <img 
+            src="/avs-college-header.png" 
+            alt="AVS Engineering College"
+            className="w-full h-auto max-h-40 object-contain mx-auto"
+            onError={(e) => {
+              // Fallback to text if image fails to load
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              const fallback = document.createElement('div');
+              fallback.className = 'text-center py-4';
+              fallback.innerHTML = `
+                <h1 className="text-2xl font-bold text-blue-800">AVS Engineering College</h1>
+                <p className="text-gray-600">Salem, Tamil Nadu</p>
+              `;
+              target.parentNode?.insertBefore(fallback, target.nextSibling);
+            }}
+          />
+        </div>
+
+        <div className="flex justify-between items-center mb-6">
           <Button variant="outline" onClick={onBack}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            Back to Search
           </Button>
-          <Button variant="outline" onClick={handlePrint}>
-            <Printer className="mr-2 h-4 w-4" />
-            Print
-          </Button>
-          <Button variant="outline" onClick={handleDownloadPDF}>
-            <Download className="mr-2 h-4 w-4" />
-            Download PDF
-          </Button>
+          <div className="space-x-2">
+            <Button variant="outline" onClick={handlePrint}>
+              <Printer className="mr-2 h-4 w-4" />
+              Print
+            </Button>
+            <Button variant="outline" onClick={handleDownloadPDF}>
+              <Download className="mr-2 h-4 w-4" />
+              Download PDF
+            </Button>
+          </div>
         </div>
 
         {/* Certificate */}
-        <Card id="certificate" className="p-8 print:p-0 print:shadow-none print:border-0" style={{ 
-          width: '210mm', 
-          minHeight: '297mm', 
+        <Card id="certificate" className="p-4 sm:p-6 md:p-8 print:p-0 print:shadow-none print:border-0" style={{ 
+          width: '100%',
+          maxWidth: '210mm',
+          minHeight: '297mm',
           margin: '0 auto',
           position: 'relative',
           boxSizing: 'border-box',
-          backgroundColor: 'white'
+          backgroundColor: 'white',
+          overflowX: 'auto'
         }}>
           {/* Header */}
           <div className="text-center mb-6 print:mb-4 print:pt-8 print:px-8">
@@ -222,15 +265,18 @@ export function CertificatePreview({ student, marks, onBack }: CertificatePrevie
           </div>
 
           {/* Marks Table */}
-          <div className="mb-6 print:mb-4 print:px-8 print:mt-8">
-            <table className="w-full border-collapse border-2 border-gray-300 print:text-sm">
+          <div className="mb-6 print:mb-4 print:px-8 print:mt-8 overflow-x-auto">
+            <table className="w-full border-collapse border-2 border-gray-300 print:text-sm min-w-[900px] sm:min-w-0">
               <thead>
                 <tr className="bg-blue-50">
-                  <th className="border-2 border-gray-300 px-4 py-3 text-left font-bold print:px-3 print:py-2">Subject</th>
-                  <th className="border-2 border-gray-300 px-4 py-3 text-center font-bold print:px-3 print:py-2">IAT1</th>
-                  <th className="border-2 border-gray-300 px-4 py-3 text-center font-bold print:px-3 print:py-2">IAT2</th>
-                  <th className="border-2 border-gray-300 px-4 py-3 text-center font-bold print:px-3 print:py-2">Model</th>
-                  <th className="border-2 border-gray-300 px-4 py-3 text-center font-bold print:px-3 print:py-2">Signature</th>
+                  <th className="border-2 border-gray-300 px-2 py-3 text-left font-bold text-xs sm:text-sm md:text-base print:px-3 print:py-2">Subject</th>
+                  <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">IAT1</th>
+                  <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">IAT2</th>
+                  <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">Model</th>
+                  <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">Assignment Submission</th>
+                  <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">Departmental Fees (₹)</th>
+                  <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">Due Status</th>
+                  <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">Signature</th>
                 </tr>
               </thead>
               <tbody>
@@ -238,18 +284,35 @@ export function CertificatePreview({ student, marks, onBack }: CertificatePrevie
                   const mark = getMarkForSubject(subject);
                   return (
                     <tr key={subject} className="hover:bg-gray-50">
-                      <td className="border-2 border-gray-300 px-4 py-3 text-sm print:px-3 print:py-2">{subject}</td>
-                      <td className="border-2 border-gray-300 px-4 py-3 text-center text-sm print:px-3 print:py-2">
+                      <td className="border-2 border-gray-300 px-2 py-2 text-xs sm:text-sm print:px-2 print:py-2">{subject}</td>
+                      <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
                         {mark?.iat1 !== undefined ? mark.iat1 : '-'}
                       </td>
-                      <td className="border-2 border-gray-300 px-4 py-3 text-center text-sm print:px-3 print:py-2">
+                      <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
                         {mark?.iat2 !== undefined ? mark.iat2 : '-'}
                       </td>
-                      <td className="border-2 border-gray-300 px-4 py-3 text-center text-sm print:px-3 print:py-2">
+                      <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
                         {mark?.model !== undefined ? mark.model : '-'}
                       </td>
-                      <td className="border-2 border-gray-300 px-4 py-3 text-center text-sm print:px-3 print:py-2">
-                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${mark?.signed ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
+                        <span className={`inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full ${mark?.assignmentSubmitted ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                          {mark?.assignmentSubmitted ? '✓' : '✗'}
+                        </span>
+                      </td>
+                      <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
+                        {mark?.departmentFine > 0 ? `₹${mark.departmentFine}` : '₹0'}
+                      </td>
+                      <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
+                        <span className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium ${
+                          mark?.assignmentSubmitted && mark?.departmentFine === 0 && mark?.signed 
+                            ? 'bg-green-100 text-green-700' 
+                            : 'bg-yellow-100 text-yellow-700'
+                        }`}>
+                          {mark?.assignmentSubmitted && mark?.departmentFine === 0 && mark?.signed ? 'Clear' : 'Pending'}
+                        </span>
+                      </td>
+                      <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
+                        <span className={`inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full ${mark?.signed ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                           {mark?.signed ? '✓' : '✗'}
                         </span>
                       </td>

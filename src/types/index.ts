@@ -15,6 +15,8 @@ export interface Mark {
   iat2: number | null;
   model: number | null;
   signed: boolean;
+  assignmentSubmitted: boolean;
+  departmentFine: number;
   created_at: string;
 }
 

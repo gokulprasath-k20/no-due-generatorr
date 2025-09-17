@@ -48,96 +48,128 @@ export const api = {
   },
 
   async getStudentByRegNo(registerNumber: string): Promise<{ student: Student | null, marks: Mark[] }> {
-    const { data, error } = await supabase
-      .from('students')
-      .select('*')
-      .eq('register_number', registerNumber)
-      .maybeSingle<Student & { department?: string }>();
-    
-    if (error) throw error;
+    try {
+      const { data, error } = await supabase
+        .from('students')
+        .select('*')
+        .eq('register_number', registerNumber)
+        .maybeSingle<Student & { department?: string }>();
+      
+      if (error) {
+        console.error('Supabase error in getStudentByRegNo:', error);
+        throw new Error(`Database error: ${error.message}`);
+      }
 
-    // If no student found, return null
-    if (!data) {
-      return { student: null, marks: [] };
+      // If no student found, return null
+      if (!data) {
+        return { student: null, marks: [] };
+      }
+
+      // Create a properly typed student object with department
+      const student: Student = {
+        id: data.id,
+        name: data.name,
+        register_number: data.register_number,
+        department: data.department || 'Not Specified',
+        year: data.year,
+        created_at: data.created_at
+      };
+
+      // Get the student's marks
+      const { data: marks, error: marksError } = await supabase
+        .from('marks')
+        .select('*')
+        .eq('student_id', student.id);
+
+      if (marksError) {
+        console.error('Supabase error getting marks:', marksError);
+        throw new Error(`Database error: ${marksError.message}`);
+      }
+
+      // Ensure all marks have required properties with default values
+      const processedMarks = (marks || []).map(mark => ({
+        ...mark,
+        signed: (mark as any).signed ?? false,
+        assignmentSubmitted: (mark as any).assignmentSubmitted ?? false,
+        departmentFine: (mark as any).departmentFine ?? 0
+      }));
+
+      return { student, marks: processedMarks };
+    } catch (error) {
+      console.error('Error in getStudentByRegNo:', error);
+      throw error;
     }
-
-    // Create a properly typed student object with department
-    const student: Student = {
-      id: data.id,
-      name: data.name,
-      register_number: data.register_number,
-      department: data.department || 'Not Specified',
-      year: data.year,
-      created_at: data.created_at
-    };
-
-    // Get the student's marks
-    const { data: marks, error: marksError } = await supabase
-      .from('marks')
-      .select('*')
-      .eq('student_id', student.id);
-
-    if (marksError) throw marksError;
-
-    // Ensure all marks have a signed property with a default value of false
-    const processedMarks = (marks || []).map(mark => ({
-      ...mark,
-      signed: (mark as any).signed ?? false
-    }));
-
-    return { student, marks: processedMarks };
   },
 
   // Admin functions
   async createStudent(name: string, registerNumber: string, year: number, department: string): Promise<Student> {
-    const { data, error } = await supabase
-      .from('students')
-      .insert([{ 
-        name, 
-        register_number: registerNumber, 
-        year,
-        department
-      }])
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('students')
+        .insert([{ 
+          name, 
+          register_number: registerNumber, 
+          year,
+          department
+        }])
+        .select()
+        .single();
 
-    if (error) throw error;
+      if (error) {
+        console.error('Supabase error creating student:', error);
+        throw new Error(`Database error: ${error.message}`);
+      }
 
-    // Create empty marks for all subjects of the year
-    const subjects = SUBJECTS_BY_YEAR[year as keyof typeof SUBJECTS_BY_YEAR];
-    const marksToInsert = subjects.map(subject => ({
-      student_id: data.id,
-      subject,
-      iat1: null,
-      iat2: null,
-      model: null
-    }));
+      // Create empty marks for all subjects of the year
+      const subjects = SUBJECTS_BY_YEAR[year as keyof typeof SUBJECTS_BY_YEAR];
+      const marksToInsert = subjects.map(subject => ({
+        student_id: data.id,
+        subject,
+        iat1: null,
+        iat2: null,
+        model: null
+      }));
 
-    const { error: marksError } = await supabase
-      .from('marks')
-      .insert(marksToInsert);
+      const { error: marksError } = await supabase
+        .from('marks')
+        .insert(marksToInsert);
 
-    if (marksError) throw marksError;
+      if (marksError) {
+        console.error('Supabase error creating marks:', marksError);
+        throw new Error(`Database error: ${marksError.message}`);
+      }
 
-    return data;
+      return data;
+    } catch (error) {
+      console.error('Error in createStudent:', error);
+      throw error;
+    }
   },
 
   async updateMarks(studentId: string, marks: Array<{ subject: string; iat1?: number; iat2?: number; model?: number; signed?: boolean }>): Promise<void> {
-    for (const mark of marks) {
-      const { error } = await supabase
-        .from('marks')
-        .upsert({
-          student_id: studentId,
-          subject: mark.subject,
-          iat1: mark.iat1 ?? null,
-          iat2: mark.iat2 ?? null,
-          model: mark.model ?? null,
-          signed: mark.signed ?? false
-        }, {
-          onConflict: 'student_id,subject'
-        });
+    try {
+      for (const mark of marks) {
+        const { error } = await supabase
+          .from('marks')
+          .upsert({
+            student_id: studentId,
+            subject: mark.subject,
+            iat1: mark.iat1 ?? null,
+            iat2: mark.iat2 ?? null,
+            model: mark.model ?? null,
+            signed: mark.signed ?? false
+          }, {
+            onConflict: 'student_id,subject'
+          });
 
-      if (error) throw error;
+        if (error) {
+          console.error('Supabase error updating marks:', error);
+          throw new Error(`Database error: ${error.message}`);
+        }
+      }
+    } catch (error) {
+      console.error('Error in updateMarks:', error);
+      throw error;
     }
   },
 

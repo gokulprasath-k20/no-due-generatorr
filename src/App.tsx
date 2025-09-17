@@ -6,8 +6,17 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
+import { validateEnvironment, getEnvironmentInfo } from "@/utils/env-check";
 
 const queryClient = new QueryClient();
+
+// Validate environment on app start
+try {
+  validateEnvironment();
+  console.log('Environment info:', getEnvironmentInfo());
+} catch (error) {
+  console.error('Environment validation failed:', error);
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
