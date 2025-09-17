@@ -246,9 +246,12 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
       });
     } catch (error) {
       console.error('Error saving marks:', error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to save marks";
       toast({
         title: "Error",
-        description: "Failed to save marks",
+        description: errorMessage.includes('column') || errorMessage.includes('does not exist') 
+          ? "Database schema needs updating. Some new features may not be available."
+          : errorMessage,
         variant: "destructive"
       });
     } finally {

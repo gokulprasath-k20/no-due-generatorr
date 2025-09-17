@@ -104,7 +104,8 @@ export const api = {
   // Admin functions
   async createStudent(name: string, registerNumber: string, year: number, department: string, semester?: number): Promise<Student> {
     try {
-      const { data, error } = await supabase
+      // First try with semester field
+      let { data, error } = await supabase
         .from('students')
         .insert([{ 
           name, 
@@ -115,6 +116,24 @@ export const api = {
         }])
         .select()
         .single();
+
+      // If semester column doesn't exist, try without it
+      if (error && (error.message.includes('column') || error.message.includes('does not exist'))) {
+        console.warn('Semester column not available, creating student without semester:', error.message);
+        const result = await supabase
+          .from('students')
+          .insert([{ 
+            name, 
+            register_number: registerNumber, 
+            year,
+            department
+          }])
+          .select()
+          .single();
+        
+        data = result.data;
+        error = result.error;
+      }
 
       if (error) {
         console.error('Supabase error creating student:', error);
@@ -150,7 +169,8 @@ export const api = {
   async updateMarks(studentId: string, marks: Array<{ subject: string; iat1?: number; iat2?: number; model?: number; signed?: boolean; assignmentSubmitted?: boolean; departmentFine?: number }>): Promise<void> {
     try {
       for (const mark of marks) {
-        const { error } = await supabase
+        // First, try with all fields
+        let { error } = await supabase
           .from('marks')
           .upsert({
             student_id: studentId,
@@ -165,7 +185,27 @@ export const api = {
             onConflict: 'student_id,subject'
           });
 
-        if (error) {
+        // If error due to missing columns, try with basic fields only
+        if (error && (error.message.includes('column') || error.message.includes('does not exist'))) {
+          console.warn('New columns not available, using basic fields only:', error.message);
+          const { error: basicError } = await supabase
+            .from('marks')
+            .upsert({
+              student_id: studentId,
+              subject: mark.subject,
+              iat1: mark.iat1 ?? null,
+              iat2: mark.iat2 ?? null,
+              model: mark.model ?? null,
+              signed: mark.signed ?? false
+            }, {
+              onConflict: 'student_id,subject'
+            });
+          
+          if (basicError) {
+            console.error('Supabase error updating marks (basic):', basicError);
+            throw new Error(`Database error: ${basicError.message}`);
+          }
+        } else if (error) {
           console.error('Supabase error updating marks:', error);
           throw new Error(`Database error: ${error.message}`);
         }

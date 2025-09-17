@@ -4,12 +4,15 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { getEnvironmentInfo } from '@/utils/env-check';
 import { api } from '@/utils/supabase-api';
+import { checkDatabaseSchema, getMigrationSQL } from '@/utils/database-migration';
 
 export function AdminDebug() {
   const [envInfo, setEnvInfo] = useState<any>(null);
   const [supabaseTest, setSupabaseTest] = useState<string>('Not tested');
   const [authTest, setAuthTest] = useState<string>('Not tested');
   const [studentTest, setStudentTest] = useState<string>('Not tested');
+  const [schemaTest, setSchemaTest] = useState<string>('Not tested');
+  const [showMigrationSQL, setShowMigrationSQL] = useState(false);
 
   useEffect(() => {
     setEnvInfo(getEnvironmentInfo());
@@ -54,9 +57,29 @@ export function AdminDebug() {
     }
   };
 
+  const testDatabaseSchema = async () => {
+    try {
+      setSchemaTest('Testing...');
+      const result = await checkDatabaseSchema();
+      
+      if (result.studentsHasSemester && result.marksHasNewFields) {
+        setSchemaTest('✅ Database schema is up to date');
+      } else {
+        const missing = [];
+        if (!result.studentsHasSemester) missing.push('semester column');
+        if (!result.marksHasNewFields) missing.push('assignment/fees columns');
+        setSchemaTest(`❌ Missing: ${missing.join(', ')}`);
+        setShowMigrationSQL(true);
+      }
+    } catch (error) {
+      setSchemaTest(`❌ Schema check failed: ${error}`);
+    }
+  };
+
   const runAllTests = async () => {
     testAdminAuth();
     await testSupabaseConnection();
+    await testDatabaseSchema();
     await testStudentSearch();
   };
 
@@ -103,6 +126,17 @@ export function AdminDebug() {
             </div>
           </div>
 
+          {/* Database Schema Test */}
+          <div>
+            <h3 className="font-semibold mb-2">Database Schema</h3>
+            <div className="flex items-center gap-2">
+              <Button onClick={testDatabaseSchema} size="sm">
+                Check Schema
+              </Button>
+              <span className="text-sm">{schemaTest}</span>
+            </div>
+          </div>
+
           {/* Student Search Test */}
           <div>
             <h3 className="font-semibold mb-2">Student Search API</h3>
@@ -113,6 +147,22 @@ export function AdminDebug() {
               <span className="text-sm">{studentTest}</span>
             </div>
           </div>
+
+          {/* Migration SQL */}
+          {showMigrationSQL && (
+            <div>
+              <h3 className="font-semibold mb-2">🔧 Database Migration Required</h3>
+              <p className="text-sm text-yellow-700 mb-2">
+                Your database is missing some columns. Run this SQL in your Supabase dashboard:
+              </p>
+              <pre className="bg-gray-100 p-3 rounded text-xs overflow-auto border">
+                {getMigrationSQL()}
+              </pre>
+              <p className="text-xs text-gray-600 mt-2">
+                Go to Supabase Dashboard → SQL Editor → Run the above commands
+              </p>
+            </div>
+          )}
 
           {/* Current URL */}
           <div>
