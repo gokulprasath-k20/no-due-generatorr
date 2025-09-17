@@ -5,6 +5,7 @@ import { Layout } from './Layout';
 import { ArrowLeft, Download, Printer } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { getSubjectColumnConfig } from '@/utils/subject-config';
 
 // College logo path
 const collegeLogo = '/avs-college-logo.png';
@@ -17,6 +18,15 @@ interface CertificatePreviewProps {
 
 export function CertificatePreview({ student, marks, onBack }: CertificatePreviewProps) {
   const subjects = SUBJECTS_BY_YEAR[student.year as keyof typeof SUBJECTS_BY_YEAR];
+  
+  // Check if any subject needs marks columns (IAT1, IAT2, Model)
+  const hasAnyMarksColumns = subjects.some(subject => getSubjectColumnConfig(subject).showMarks);
+  // Check if any subject needs assignment column
+  const hasAnyAssignmentColumns = subjects.some(subject => getSubjectColumnConfig(subject).showAssignment);
+  // Check if any subject needs department fees column
+  const hasAnyDepartmentFeesColumns = subjects.some(subject => getSubjectColumnConfig(subject).showDepartmentFees);
+  // Check if any subject needs due status column
+  const hasAnyDueStatusColumns = subjects.some(subject => getSubjectColumnConfig(subject).showDueStatus);
   
   const getMarkForSubject = (subject: string) => {
     const mark = marks.find(mark => mark.subject === subject);
@@ -270,47 +280,80 @@ export function CertificatePreview({ student, marks, onBack }: CertificatePrevie
               <thead>
                 <tr className="bg-blue-50">
                   <th className="border-2 border-gray-300 px-2 py-3 text-left font-bold text-xs sm:text-sm md:text-base print:px-3 print:py-2">Subject</th>
-                  <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">IAT1</th>
-                  <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">IAT2</th>
-                  <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">Model</th>
-                  <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">Assignment Submission</th>
-                  <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">Departmental Fees (₹)</th>
-                  <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">Due Status</th>
+                  {hasAnyMarksColumns && (
+                    <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">IAT1</th>
+                  )}
+                  {hasAnyMarksColumns && (
+                    <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">IAT2</th>
+                  )}
+                  {hasAnyMarksColumns && (
+                    <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">Model</th>
+                  )}
+                  {hasAnyAssignmentColumns && (
+                    <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">Assignment Submission</th>
+                  )}
+                  {hasAnyDepartmentFeesColumns && (
+                    <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">Departmental Fees (₹)</th>
+                  )}
+                  {hasAnyDueStatusColumns && (
+                    <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">Due Status</th>
+                  )}
                   <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">Signature</th>
                 </tr>
               </thead>
               <tbody>
                 {subjects.map((subject) => {
                   const mark = getMarkForSubject(subject);
+                  const config = getSubjectColumnConfig(subject);
                   return (
                     <tr key={subject} className="hover:bg-gray-50">
                       <td className="border-2 border-gray-300 px-2 py-2 text-xs sm:text-sm print:px-2 print:py-2">{subject}</td>
-                      <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
-                        {mark?.iat1 !== undefined ? mark.iat1 : '-'}
-                      </td>
-                      <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
-                        {mark?.iat2 !== undefined ? mark.iat2 : '-'}
-                      </td>
-                      <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
-                        {mark?.model !== undefined ? mark.model : '-'}
-                      </td>
-                      <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
-                        <span className={`inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full ${mark?.assignmentSubmitted ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                          {mark?.assignmentSubmitted ? '✓' : '✗'}
-                        </span>
-                      </td>
-                      <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
-                        {mark?.departmentFine > 0 ? `₹${mark.departmentFine}` : '₹0'}
-                      </td>
-                      <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
-                        <span className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium ${
-                          mark?.assignmentSubmitted && mark?.departmentFine === 0 && mark?.signed 
-                            ? 'bg-green-100 text-green-700' 
-                            : 'bg-yellow-100 text-yellow-700'
-                        }`}>
-                          {mark?.assignmentSubmitted && mark?.departmentFine === 0 && mark?.signed ? 'Clear' : 'Pending'}
-                        </span>
-                      </td>
+                      {hasAnyMarksColumns && (
+                        <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
+                          {config.showMarks ? (mark?.iat1 !== undefined ? mark.iat1 : '-') : '-'}
+                        </td>
+                      )}
+                      {hasAnyMarksColumns && (
+                        <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
+                          {config.showMarks ? (mark?.iat2 !== undefined ? mark.iat2 : '-') : '-'}
+                        </td>
+                      )}
+                      {hasAnyMarksColumns && (
+                        <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
+                          {config.showMarks ? (mark?.model !== undefined ? mark.model : '-') : '-'}
+                        </td>
+                      )}
+                      {hasAnyAssignmentColumns && (
+                        <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
+                          {config.showAssignment ? (
+                            <span className={`inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full ${mark?.assignmentSubmitted ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                              {mark?.assignmentSubmitted ? '✓' : '✗'}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </td>
+                      )}
+                      {hasAnyDepartmentFeesColumns && (
+                        <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
+                          {config.showDepartmentFees ? (mark?.departmentFine > 0 ? `₹${mark.departmentFine}` : '₹0') : '-'}
+                        </td>
+                      )}
+                      {hasAnyDueStatusColumns && (
+                        <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
+                          {config.showDueStatus ? (
+                            <span className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium ${
+                              mark?.assignmentSubmitted && mark?.departmentFine === 0 && mark?.signed 
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-yellow-100 text-yellow-700'
+                            }`}>
+                              {mark?.assignmentSubmitted && mark?.departmentFine === 0 && mark?.signed ? 'Clear' : 'Pending'}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </td>
+                      )}
                       <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
                         <span className={`inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full ${mark?.signed ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                           {mark?.signed ? '✓' : '✗'}

@@ -9,6 +9,7 @@ import { api } from '@/utils/supabase-api';
 import { Student, Mark, SUBJECTS_BY_YEAR } from '@/types';
 import { Layout } from './Layout';
 import { Loader2, Search, UserPlus, Save, LogOut } from 'lucide-react';
+import { shouldShowMarksColumns } from '@/utils/subject-config';
 
 interface AdminPanelProps {
   onLogout: () => void;
@@ -305,44 +306,63 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                       <th className="border border-gray-300 px-4 py-2 text-center">IAT1</th>
                       <th className="border border-gray-300 px-4 py-2 text-center">IAT2</th>
                       <th className="border border-gray-300 px-4 py-2 text-center">Model</th>
+                      <th className="border border-gray-300 px-4 py-2 text-center">Signature</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {SUBJECTS_BY_YEAR[student.year as keyof typeof SUBJECTS_BY_YEAR].map((subject) => (
-                      <tr key={subject}>
-                        <td className="border border-gray-300 px-4 py-2 font-medium">{subject}</td>
-                        <td className="border border-gray-300 px-2 py-2">
-                          <Input
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={getMarkValue(subject, 'iat1')}
-                            onChange={(e) => updateMark(subject, 'iat1', e.target.value)}
-                            className="text-center"
-                          />
-                        </td>
-                        <td className="border border-gray-300 px-2 py-2">
-                          <Input
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={getMarkValue(subject, 'iat2')}
-                            onChange={(e) => updateMark(subject, 'iat2', e.target.value)}
-                            className="text-center"
-                          />
-                        </td>
-                        <td className="border border-gray-300 px-2 py-2">
-                          <Input
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={getMarkValue(subject, 'model')}
-                            onChange={(e) => updateMark(subject, 'model', e.target.value)}
-                            className="text-center"
-                          />
-                        </td>
-                      </tr>
-                    ))}
+                    {SUBJECTS_BY_YEAR[student.year as keyof typeof SUBJECTS_BY_YEAR].map((subject) => {
+                      const showMarks = shouldShowMarksColumns(subject);
+                      return (
+                        <tr key={subject}>
+                          <td className="border border-gray-300 px-4 py-2 font-medium">{subject}</td>
+                          <td className="border border-gray-300 px-2 py-2">
+                            {showMarks ? (
+                              <Input
+                                type="number"
+                                min="0"
+                                max="100"
+                                value={getMarkValue(subject, 'iat1')}
+                                onChange={(e) => updateMark(subject, 'iat1', e.target.value)}
+                                className="text-center"
+                              />
+                            ) : (
+                              <span className="text-gray-400 text-center block">N/A</span>
+                            )}
+                          </td>
+                          <td className="border border-gray-300 px-2 py-2">
+                            {showMarks ? (
+                              <Input
+                                type="number"
+                                min="0"
+                                max="100"
+                                value={getMarkValue(subject, 'iat2')}
+                                onChange={(e) => updateMark(subject, 'iat2', e.target.value)}
+                                className="text-center"
+                              />
+                            ) : (
+                              <span className="text-gray-400 text-center block">N/A</span>
+                            )}
+                          </td>
+                          <td className="border border-gray-300 px-2 py-2">
+                            {showMarks ? (
+                              <Input
+                                type="number"
+                                min="0"
+                                max="100"
+                                value={getMarkValue(subject, 'model')}
+                                onChange={(e) => updateMark(subject, 'model', e.target.value)}
+                                className="text-center"
+                              />
+                            ) : (
+                              <span className="text-gray-400 text-center block">N/A</span>
+                            )}
+                          </td>
+                          <td className="border border-gray-300 px-2 py-2 text-center">
+                            <span className="text-gray-400">Pending</span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
