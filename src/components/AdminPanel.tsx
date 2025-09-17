@@ -158,6 +158,71 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
     });
   };
 
+  const updateAssignmentSubmission = (subject: string, submitted: boolean) => {
+    setMarks(prev => {
+      const existing = prev.find(m => m.subject === subject);
+      if (existing) {
+        return prev.map(m => 
+          m.subject === subject 
+            ? { ...m, assignmentSubmitted: submitted }
+            : m
+        );
+      } else {
+        return [...prev, {
+          id: '',
+          student_id: student!.id,
+          subject,
+          iat1: null,
+          iat2: null,
+          model: null,
+          signed: false,
+          assignmentSubmitted: submitted,
+          departmentFine: 0,
+          created_at: new Date().toISOString()
+        }];
+      }
+    });
+  };
+
+  const updateDepartmentFees = (subject: string, isPaid: boolean) => {
+    setMarks(prev => {
+      const existing = prev.find(m => m.subject === subject);
+      if (existing) {
+        return prev.map(m => 
+          m.subject === subject 
+            ? { ...m, departmentFine: isPaid ? 0 : 1 } // 0 = paid, 1 = pending
+            : m
+        );
+      } else {
+        return [...prev, {
+          id: '',
+          student_id: student!.id,
+          subject,
+          iat1: null,
+          iat2: null,
+          model: null,
+          signed: false,
+          assignmentSubmitted: false,
+          departmentFine: isPaid ? 0 : 1,
+          created_at: new Date().toISOString()
+        }];
+      }
+    });
+  };
+
+  const getDueStatus = (subject: string): 'Completed' | 'Pending' => {
+    const mark = marks.find(m => m.subject === subject);
+    if (!mark) return 'Pending';
+    
+    // For Office and Library, only check signature
+    if (subject === 'Office' || subject === 'Library') {
+      return mark.signed ? 'Completed' : 'Pending';
+    }
+    
+    // For academic subjects, check assignment submission and department fees
+    return mark.assignmentSubmitted && mark.departmentFine === 0 ? 'Completed' : 'Pending';
+  };
+
   const saveMarks = async () => {
     if (!student) return;
 
@@ -167,7 +232,10 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
         subject: mark.subject,
         iat1: mark.iat1,
         iat2: mark.iat2,
-        model: mark.model
+        model: mark.model,
+        assignmentSubmitted: mark.assignmentSubmitted,
+        departmentFine: mark.departmentFine,
+        signed: mark.signed
       }));
 
       await api.updateMarks(student.id, marksToSave);
@@ -192,6 +260,16 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
     const mark = marks.find(m => m.subject === subject);
     const value = mark?.[field];
     return value === null || value === undefined ? '' : value.toString();
+  };
+
+  const getAssignmentStatus = (subject: string): boolean => {
+    const mark = marks.find(m => m.subject === subject);
+    return mark?.assignmentSubmitted ?? false;
+  };
+
+  const getDepartmentFeesStatus = (subject: string): boolean => {
+    const mark = marks.find(m => m.subject === subject);
+    return mark?.departmentFine === 0; // 0 = paid, >0 = pending
   };
 
   return (
@@ -337,6 +415,8 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                       <th className="border border-gray-300 px-4 py-2 text-center">IAT1</th>
                       <th className="border border-gray-300 px-4 py-2 text-center">IAT2</th>
                       <th className="border border-gray-300 px-4 py-2 text-center">Model</th>
+                      <th className="border border-gray-300 px-4 py-2 text-center">Assignment</th>
+                      <th className="border border-gray-300 px-4 py-2 text-center">Due Status</th>
                       <th className="border border-gray-300 px-4 py-2 text-center">Signature</th>
                     </tr>
                   </thead>
@@ -389,6 +469,33 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                             )}
                           </td>
                           <td className="border border-gray-300 px-2 py-2 text-center">
+                            {shouldShowMarksColumns(subject) ? (
+                              <Select
+                                value={getAssignmentStatus(subject) ? 'submitted' : 'not-submitted'}
+                                onValueChange={(value) => updateAssignmentSubmission(subject, value === 'submitted')}
+                              >
+                                <SelectTrigger className="w-full">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="submitted">Submit</SelectItem>
+                                  <SelectItem value="not-submitted">Not Submit</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <span className="text-gray-400">N/A</span>
+                            )}
+                          </td>
+                          <td className="border border-gray-300 px-2 py-2 text-center">
+                            <span className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium ${
+                              getDueStatus(subject) === 'Completed' 
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-yellow-100 text-yellow-700'
+                            }`}>
+                              {getDueStatus(subject)}
+                            </span>
+                          </td>
+                          <td className="border border-gray-300 px-2 py-2 text-center">
                             <span className="text-gray-400">Pending</span>
                           </td>
                         </tr>
@@ -397,6 +504,35 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                   </tbody>
                 </table>
               </div>
+              
+              {/* Department Fees Section - Single Row */}
+              <div className="mt-6 p-4 border rounded-lg bg-gray-50">
+                <h3 className="text-lg font-semibold mb-3">Department Fees Status</h3>
+                <div className="flex items-center gap-4">
+                  <Label className="font-medium">Overall Department Fees:</Label>
+                  <Select
+                    value={marks.some(m => m.departmentFine > 0) ? 'pending' : 'paid'}
+                    onValueChange={(value) => {
+                      const isPaid = value === 'paid';
+                      // Update all academic subjects (not Office/Library)
+                      getSubjectsForYearSem(student.year, student.semester).forEach(subject => {
+                        if (shouldShowMarksColumns(subject)) {
+                          updateDepartmentFees(subject, isPaid);
+                        }
+                      });
+                    }}
+                  >
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="paid">Paid</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               <Button onClick={saveMarks} disabled={saving} className="w-full md:w-auto">
                 {saving ? (
                   <>

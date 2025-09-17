@@ -147,7 +147,7 @@ export const api = {
     }
   },
 
-  async updateMarks(studentId: string, marks: Array<{ subject: string; iat1?: number; iat2?: number; model?: number; signed?: boolean }>): Promise<void> {
+  async updateMarks(studentId: string, marks: Array<{ subject: string; iat1?: number; iat2?: number; model?: number; signed?: boolean; assignmentSubmitted?: boolean; departmentFine?: number }>): Promise<void> {
     try {
       for (const mark of marks) {
         const { error } = await supabase
@@ -158,7 +158,9 @@ export const api = {
             iat1: mark.iat1 ?? null,
             iat2: mark.iat2 ?? null,
             model: mark.model ?? null,
-            signed: mark.signed ?? false
+            signed: mark.signed ?? false,
+            assignmentSubmitted: mark.assignmentSubmitted ?? false,
+            departmentFine: mark.departmentFine ?? 0
           }, {
             onConflict: 'student_id,subject'
           });
