@@ -369,15 +369,15 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
               <div className="space-y-4">
                 <div>
                   <p className="text-sm font-medium text-black mb-1">Date:</p>
-                  <p className="text-base text-black">{new Date().toLocaleDateString('en-US', { 
-                    month: 'numeric', 
-                    day: 'numeric', 
+                  <p className="text-base text-black">{new Date().toLocaleDateString('en-GB', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
                     year: 'numeric' 
                   })}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-black mb-1">Year/Sem:</p>
-                  <p className="text-base text-black">{student.year === 2 ? '2nd Year' : '3rd Year'}{student.semester ? `/${student.semester}` : ''}</p>
+                  <p className="text-base text-black">{student.year === 2 ? '2nd' : '3rd'} / {student.semester ? `${student.semester}th` : ''}</p>
                 </div>
               </div>
             </div>
