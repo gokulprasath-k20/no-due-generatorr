@@ -103,6 +103,16 @@ export const api = {
       
       if (data && data.length > 0) {
         console.log('API: First student sample:', data[0]);
+        console.log('API: Semester data types analysis:');
+        data.forEach((student, index) => {
+          const studentAny = student as any; // Cast to any to access potentially missing properties
+          console.log(`API: Student ${index + 1} - ${student.name}:`, {
+            semester: studentAny.semester,
+            semesterType: typeof studentAny.semester,
+            semesterValue: JSON.stringify(studentAny.semester),
+            allProperties: Object.keys(student)
+          });
+        });
       }
       
       const result = data || [];

@@ -52,16 +52,28 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
       console.log('AdminPanel: Is students an array?', Array.isArray(students));
       
       if (students && students.length > 0) {
+        console.log('AdminPanel: Detailed student analysis:');
+        const semesterCounts: Record<string, number> = {};
+        
         students.forEach((student, index) => {
+          const semesterKey = student.semester ? `${student.semester}` : 'undefined';
+          semesterCounts[semesterKey] = (semesterCounts[semesterKey] || 0) + 1;
+          
           console.log(`Student ${index + 1}:`, {
             id: student.id,
             name: student.name,
             register_number: student.register_number,
             semester: student.semester,
+            semesterType: typeof student.semester,
             year: student.year,
             department: student.department
           });
         });
+        
+        console.log('AdminPanel: Students by semester count:', semesterCounts);
+        console.log('AdminPanel: 3rd semester students specifically:', 
+          students.filter(s => s.semester === 3).map(s => ({ name: s.name, semester: s.semester }))
+        );
       } else {
         console.log('AdminPanel: No students found in database');
       }
@@ -438,11 +450,40 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
 
   // Filter students based on selected semester
   const getFilteredStudents = (): Student[] => {
+    console.log('AdminPanel: getFilteredStudents called with filter:', selectedSemesterFilter);
+    console.log('AdminPanel: Total students before filtering:', allStudents.length);
+    
     if (selectedSemesterFilter === 'all') {
+      console.log('AdminPanel: Returning all students (no filter)');
       return allStudents;
     }
+    
     const semesterNumber = parseInt(selectedSemesterFilter);
-    return allStudents.filter(student => student.semester === semesterNumber);
+    console.log('AdminPanel: Filtering for semester number:', semesterNumber, 'type:', typeof semesterNumber);
+    
+    const filtered = allStudents.filter(student => {
+      // Handle both string and number semester values
+      const studentSemester = typeof student.semester === 'string' ? parseInt(student.semester) : student.semester;
+      const matches = studentSemester === semesterNumber;
+      
+      if (!matches && (studentSemester === 3)) {
+        console.log('AdminPanel: 3rd semester student not matching filter:', {
+          studentName: student.name,
+          studentSemester: student.semester,
+          studentSemesterParsed: studentSemester,
+          studentSemesterType: typeof student.semester,
+          filterSemester: semesterNumber,
+          filterSemesterType: typeof semesterNumber,
+          matches
+        });
+      }
+      return matches;
+    });
+    
+    console.log('AdminPanel: Filtered students count:', filtered.length);
+    console.log('AdminPanel: Filtered students:', filtered.map(s => ({ name: s.name, semester: s.semester })));
+    
+    return filtered;
   };
 
   // Helper function to format ordinal numbers
@@ -565,14 +606,25 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                 {(() => {
                   // Group filtered students by semester
                   const filteredStudents = getFilteredStudents();
+                  console.log('AdminPanel: Grouping students, filtered count:', filteredStudents.length);
+                  
                   const studentsBySemester = filteredStudents.reduce((acc, student) => {
-                    const semesterKey = student.semester ? `${student.semester}th Semester` : 'No Semester';
+                    // Handle both string and number semester values for grouping
+                    const semesterValue = typeof student.semester === 'string' ? parseInt(student.semester) : student.semester;
+                    const semesterKey = semesterValue ? `${semesterValue}th Semester` : 'No Semester';
+                    console.log('AdminPanel: Grouping student:', student.name, 'with semester key:', semesterKey, 'original semester:', student.semester);
+                    
                     if (!acc[semesterKey]) {
                       acc[semesterKey] = [];
                     }
                     acc[semesterKey].push(student);
                     return acc;
                   }, {} as Record<string, typeof allStudents>);
+                  
+                  console.log('AdminPanel: Students grouped by semester:', Object.keys(studentsBySemester).map(key => ({
+                    semester: key,
+                    count: studentsBySemester[key].length
+                  })));
 
                   // Sort each semester group alphabetically by name
                   Object.keys(studentsBySemester).forEach(semester => {
