@@ -3,7 +3,7 @@ import { Student, Mark, SUBJECTS_BY_YEAR, getSubjectsForYearSem } from '@/types'
 
 export const api = {
   // Student functions
-  async registerStudent(name: string, registerNumber: string, year: number, department: string): Promise<Student> {
+  async registerStudent(name: string, registerNumber: string, year: number, department: string, semester?: number): Promise<Student> {
     // Check if student already exists
     const { data: existingStudent } = await supabase
       .from('students')
@@ -15,34 +15,60 @@ export const api = {
       throw new Error('Student with this register number already exists');
     }
 
-    const { data, error } = await supabase
+    // Try with semester field first
+    let { data, error } = await supabase
       .from('students')
       .insert([{ 
         name, 
         register_number: registerNumber, 
         year,
-        department
+        department,
+        semester
       }])
       .select()
       .single();
 
+    // If semester column doesn't exist, try without it
+    if (error && (error.message.includes('column') || error.message.includes('does not exist'))) {
+      console.warn('Semester column not available, creating student without semester:', error.message);
+      const result = await supabase
+        .from('students')
+        .insert([{ 
+          name, 
+          register_number: registerNumber, 
+          year,
+          department
+        }])
+        .select()
+        .single();
+      
+      data = result.data;
+      error = result.error;
+    }
+
     if (error) throw error;
 
-    // Create empty marks for all subjects of the year
-    const subjects = SUBJECTS_BY_YEAR[year as keyof typeof SUBJECTS_BY_YEAR];
+    // Create empty marks for all subjects based on year and semester
+    const subjects = getSubjectsForYearSem(year, semester);
     const marksToInsert = subjects.map(subject => ({
       student_id: data.id,
       subject,
       iat1: null,
       iat2: null,
-      model: null
+      model: null,
+      signed: false,
+      assignmentSubmitted: false,
+      departmentFine: 0
     }));
 
     const { error: marksError } = await supabase
       .from('marks')
       .insert(marksToInsert);
 
-    if (marksError) throw marksError;
+    if (marksError) {
+      console.error('Error creating marks:', marksError);
+      // Don't throw error for marks creation failure in registration
+    }
 
     return data;
   },

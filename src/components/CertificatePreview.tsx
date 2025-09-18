@@ -275,6 +275,12 @@ export function CertificatePreview({ student, marks, onBack }: CertificatePrevie
                   <p className="text-xs text-gray-500">Register Number</p>
                   <p className="text-base font-mono">{student.register_number}</p>
                 </div>
+                {student.semester && (
+                  <div className="border-b border-gray-200 pb-1">
+                    <p className="text-xs text-gray-500">Semester</p>
+                    <p className="text-base">{student.semester}{student.semester === 1 ? 'st' : student.semester === 2 ? 'nd' : student.semester === 3 ? 'rd' : 'th'} Semester</p>
+                  </div>
+                )}
               </div>
               
               {/* Right side - Date, Department and Year */}

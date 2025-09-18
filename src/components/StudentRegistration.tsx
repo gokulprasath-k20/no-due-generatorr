@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { api } from '@/utils/supabase-api';
+import { getYearFromSemester } from '@/types';
 import { Layout } from './Layout';
 import { Loader2, UserPlus, ArrowLeft } from 'lucide-react';
 
@@ -25,12 +26,12 @@ const DEPARTMENTS = [
 export function StudentRegistration({ onBack, onRegistrationSuccess }: StudentRegistrationProps) {
   const [name, setName] = useState('');
   const [registerNumber, setRegisterNumber] = useState('');
-  const [year, setYear] = useState<string>('');
+  const [semester, setSemester] = useState<string>('');
   const [department, setDepartment] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!name.trim() || !registerNumber.trim() || !year || !department) {
+    if (!name.trim() || !registerNumber.trim() || !semester || !department) {
       toast({
         title: "Error",
         description: "Please fill in all fields",
@@ -41,7 +42,9 @@ export function StudentRegistration({ onBack, onRegistrationSuccess }: StudentRe
 
     setLoading(true);
     try {
-      await api.registerStudent(name.trim(), registerNumber.trim(), parseInt(year), department);
+      const semesterNum = parseInt(semester);
+      const year = getYearFromSemester(semesterNum);
+      await api.registerStudent(name.trim(), registerNumber.trim(), year, department, semesterNum);
       
       toast({
         title: "Registration Successful",
@@ -116,38 +119,42 @@ export function StudentRegistration({ onBack, onRegistrationSuccess }: StudentRe
               />
             </div>
             
-            <div className="space-y-2">
-              <label htmlFor="year" className="text-sm font-medium text-gray-700">
-                Year
-              </label>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Year</label>
-                  <Select value={year} onValueChange={setYear}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select year" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="2">2nd Year</SelectItem>
-                      <SelectItem value="3">3rd Year</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Department</label>
-                  <Select value={department} onValueChange={setDepartment}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select department" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {DEPARTMENTS.map((dept) => (
-                        <SelectItem key={dept} value={dept}>
-                          {dept}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="semester" className="text-sm font-medium text-gray-700">
+                  Semester
+                </label>
+                <Select value={semester} onValueChange={setSemester}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select semester" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="3">3rd Semester</SelectItem>
+                    <SelectItem value="4">4th Semester</SelectItem>
+                    <SelectItem value="5">5th Semester</SelectItem>
+                    <SelectItem value="6">6th Semester</SelectItem>
+                    <SelectItem value="7">7th Semester</SelectItem>
+                    <SelectItem value="8">8th Semester</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="department" className="text-sm font-medium text-gray-700">
+                  Department
+                </label>
+                <Select value={department} onValueChange={setDepartment}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DEPARTMENTS.map((dept) => (
+                      <SelectItem key={dept} value={dept}>
+                        {dept}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             
