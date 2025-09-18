@@ -39,27 +39,57 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
 
   const fetchAllStudents = async () => {
     setLoadingStudents(true);
+    console.log('AdminPanel: Starting to fetch all students...');
+    
     try {
+      console.log('AdminPanel: Calling api.getAllStudents()...');
       const students = await api.getAllStudents();
+      
+      console.log('AdminPanel: API call completed successfully');
       console.log('AdminPanel: Fetched students from database:', students);
-      console.log('AdminPanel: Total students count:', students.length);
-      students.forEach((student, index) => {
-        console.log(`Student ${index + 1}:`, {
-          name: student.name,
-          register_number: student.register_number,
-          semester: student.semester,
-          year: student.year
+      console.log('AdminPanel: Total students count:', students?.length || 0);
+      console.log('AdminPanel: Students array type:', typeof students);
+      console.log('AdminPanel: Is students an array?', Array.isArray(students));
+      
+      if (students && students.length > 0) {
+        students.forEach((student, index) => {
+          console.log(`Student ${index + 1}:`, {
+            id: student.id,
+            name: student.name,
+            register_number: student.register_number,
+            semester: student.semester,
+            year: student.year,
+            department: student.department
+          });
         });
+      } else {
+        console.log('AdminPanel: No students found in database');
+      }
+      
+      setAllStudents(students || []);
+      
+      // Show success toast with count
+      toast({
+        title: "Students Loaded",
+        description: `Found ${students?.length || 0} registered students`,
       });
-      setAllStudents(students);
+      
     } catch (error) {
-      console.error('Error fetching students:', error);
+      console.error('AdminPanel: Error fetching students:', error);
+      console.error('AdminPanel: Error type:', typeof error);
+      console.error('AdminPanel: Error message:', error instanceof Error ? error.message : 'Unknown error');
+      console.error('AdminPanel: Full error object:', error);
+      
       toast({
         title: "Error",
-        description: "Failed to fetch registered students",
+        description: `Failed to fetch registered students: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive"
       });
+      
+      // Set empty array on error
+      setAllStudents([]);
     } finally {
+      console.log('AdminPanel: Finished fetching students, setting loading to false');
       setLoadingStudents(false);
     }
   };
@@ -511,8 +541,23 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                 <span className="ml-2">Loading students...</span>
               </div>
             ) : getFilteredStudents().length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                {selectedSemesterFilter === 'all' ? 'No registered students found' : `No students found for ${getOrdinalSuffix(selectedSemesterFilter)} semester`}
+              <div className="text-center py-8">
+                <div className="text-gray-500 mb-4">
+                  {selectedSemesterFilter === 'all' ? 'No registered students found' : `No students found for ${getOrdinalSuffix(selectedSemesterFilter)} semester`}
+                </div>
+                <div className="text-sm text-gray-400 mb-4">
+                  Total students in database: {allStudents.length}
+                </div>
+                {allStudents.length === 0 && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto">
+                    <p className="text-blue-800 text-sm mb-2">
+                      <strong>No students registered yet.</strong>
+                    </p>
+                    <p className="text-blue-600 text-xs">
+                      Use the search box above to create a new student, or check your database connection.
+                    </p>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="space-y-6">

@@ -75,23 +75,42 @@ export const api = {
 
   async getAllStudents(): Promise<Student[]> {
     try {
-      console.log('API: Fetching all students from database...');
+      console.log('API: Starting getAllStudents function...');
+      console.log('API: Supabase client status:', !!supabase);
+      
+      console.log('API: Attempting to fetch students from database...');
       const { data, error } = await supabase
         .from('students')
         .select('*')
         .order('created_at', { ascending: false });
       
+      console.log('API: Supabase query completed');
+      console.log('API: Query error:', error);
+      console.log('API: Query data:', data);
+      
       if (error) {
-        console.error('Supabase error in getAllStudents:', error);
+        console.error('API: Supabase error in getAllStudents:', error);
+        console.error('API: Error code:', error.code);
+        console.error('API: Error details:', error.details);
+        console.error('API: Error hint:', error.hint);
         throw new Error(`Database error: ${error.message}`);
       }
 
       console.log('API: Raw data from database:', data);
+      console.log('API: Data type:', typeof data);
+      console.log('API: Is data an array?', Array.isArray(data));
       console.log('API: Number of students found:', data?.length || 0);
       
-      return data || [];
+      if (data && data.length > 0) {
+        console.log('API: First student sample:', data[0]);
+      }
+      
+      const result = data || [];
+      console.log('API: Returning result:', result);
+      return result;
     } catch (error) {
-      console.error('Error in getAllStudents:', error);
+      console.error('API: Caught error in getAllStudents:', error);
+      console.error('API: Error stack:', error instanceof Error ? error.stack : 'No stack trace');
       throw error;
     }
   },
