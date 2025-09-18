@@ -214,6 +214,32 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
     });
   };
 
+  const updateSignature = (subject: string, signed: boolean) => {
+    setMarks(prev => {
+      const existing = prev.find(m => m.subject === subject);
+      if (existing) {
+        return prev.map(m => 
+          m.subject === subject 
+            ? { ...m, signed }
+            : m
+        );
+      } else {
+        return [...prev, {
+          id: '',
+          student_id: student!.id,
+          subject,
+          iat1: null,
+          iat2: null,
+          model: null,
+          signed,
+          assignmentSubmitted: false,
+          departmentFine: 0,
+          created_at: new Date().toISOString()
+        }];
+      }
+    });
+  };
+
   const getDueStatus = (subject: string): 'Completed' | 'Pending' => {
     const mark = marks.find(m => m.subject === subject);
     if (!mark) return 'Pending';
@@ -277,6 +303,11 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   const getDepartmentFeesStatus = (subject: string): boolean => {
     const mark = marks.find(m => m.subject === subject);
     return mark?.departmentFine === 0; // 0 = paid, >0 = pending
+  };
+
+  const getSignatureStatus = (subject: string): boolean => {
+    const mark = marks.find(m => m.subject === subject);
+    return mark?.signed ?? false;
   };
 
   return (
@@ -503,7 +534,18 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                             </span>
                           </td>
                           <td className="border border-gray-300 px-2 py-2 text-center">
-                            <span className="text-gray-400">Pending</span>
+                            <Select
+                              value={getSignatureStatus(subject) ? 'signed' : 'pending'}
+                              onValueChange={(value) => updateSignature(subject, value === 'signed')}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="signed">Signed</SelectItem>
+                                <SelectItem value="pending">Pending</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </td>
                         </tr>
                       );

@@ -36,6 +36,18 @@ export function CertificatePreview({ student, marks, onBack }: CertificatePrevie
   console.log('Has due status columns:', hasAnyDueStatusColumns);
   console.log('Marks data:', marks);
   
+  const getDueStatusForSubject = (subject: string, mark: any): 'Completed' | 'Pending' => {
+    if (!mark) return 'Pending';
+    
+    // For Office and Library, only check signature
+    if (subject === 'Office' || subject === 'Library') {
+      return mark.signed ? 'Completed' : 'Pending';
+    }
+    
+    // For academic subjects, check assignment submission and department fees
+    return mark.assignmentSubmitted && mark.departmentFine === 0 ? 'Completed' : 'Pending';
+  };
+
   const getMarkForSubject = (subject: string) => {
     const mark = marks.find(mark => mark.subject === subject);
     // Create a default mark object if not found
@@ -335,9 +347,13 @@ export function CertificatePreview({ student, marks, onBack }: CertificatePrevie
                       {hasAnyAssignmentColumns && (
                         <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
                           {config.showAssignment ? (
-                            <span className={`inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full ${mark?.assignmentSubmitted ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                              {mark?.assignmentSubmitted ? '✓' : '✗'}
-                            </span>
+                            mark?.assignmentSubmitted ? (
+                              <span className="inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-green-100 text-green-700">
+                                ✓
+                              </span>
+                            ) : (
+                              <span className="text-gray-400 text-sm">Not Submitted</span>
+                            )
                           ) : (
                             <span className="text-gray-400">-</span>
                           )}
@@ -352,11 +368,11 @@ export function CertificatePreview({ student, marks, onBack }: CertificatePrevie
                         <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
                           {config.showDueStatus ? (
                             <span className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium ${
-                              mark?.assignmentSubmitted && mark?.departmentFine === 0 && mark?.signed 
+                              getDueStatusForSubject(subject, mark) === 'Completed'
                                 ? 'bg-green-100 text-green-700' 
                                 : 'bg-yellow-100 text-yellow-700'
                             }`}>
-                              {mark?.assignmentSubmitted && mark?.departmentFine === 0 && mark?.signed ? 'Clear' : 'Pending'}
+                              {getDueStatusForSubject(subject, mark)}
                             </span>
                           ) : (
                             <span className="text-gray-400">-</span>
@@ -364,9 +380,13 @@ export function CertificatePreview({ student, marks, onBack }: CertificatePrevie
                         </td>
                       )}
                       <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
-                        <span className={`inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full ${mark?.signed ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                          {mark?.signed ? '✓' : '✗'}
-                        </span>
+                        {mark?.signed ? (
+                          <span className="inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-green-100 text-green-700">
+                            ✓
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 text-sm">Pending</span>
+                        )}
                       </td>
                     </tr>
                   );
