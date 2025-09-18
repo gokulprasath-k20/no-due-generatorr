@@ -427,81 +427,27 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
 
           {/* Marks Table */}
           <div className="mb-8 print:mb-6 print:px-8 print:mt-8">
-            <div className="bg-white rounded-2xl shadow-2xl border-2 border-blue-100 overflow-hidden relative">
-              {/* Decorative corner elements */}
-              <div className="absolute top-0 left-0 w-20 h-20 bg-gradient-to-br from-blue-500 to-transparent opacity-10 rounded-br-full"></div>
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-indigo-500 to-transparent opacity-10 rounded-bl-full"></div>
-              
-              <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 px-8 py-6 relative">
-                <div className="flex items-center justify-center gap-3">
-                  <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                    <span className="text-xl">🎓</span>
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                  <div className="w-6 h-6 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                    <span className="text-sm">📊</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-white tracking-wide">
-                    ACADEMIC PERFORMANCE & CLEARANCE STATUS
-                  </h3>
-                  <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                    <span className="text-xl">📋</span>
-                  </div>
-                </div>
-                {/* Decorative line */}
-                <div className="mt-3 flex justify-center">
-                  <div className="w-32 h-1 bg-white bg-opacity-30 rounded-full"></div>
-                </div>
+                  Academic Performance & Clearance Status
+                </h3>
               </div>
-              
-              <div className="overflow-x-auto bg-gradient-to-b from-gray-50 to-white">
+              <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
-                    <tr className="bg-gradient-to-r from-slate-100 via-blue-50 to-slate-100">
-                      <th className="border-2 border-blue-200 px-4 py-5 text-center font-bold text-sm text-slate-700 bg-gradient-to-b from-blue-100 to-blue-50 relative">
-                        <div className="flex items-center justify-center gap-2">
-                          <span className="text-blue-600">📚</span>
-                          <span>SUBJECT</span>
-                        </div>
-                      </th>
-                      <th className="border-2 border-green-200 px-3 py-5 text-center font-bold text-sm text-slate-700 bg-gradient-to-b from-green-100 to-green-50">
-                        <div className="flex items-center justify-center gap-1">
-                          <span className="text-green-600">📝</span>
-                          <span>IAT1</span>
-                        </div>
-                      </th>
-                      <th className="border-2 border-green-200 px-3 py-5 text-center font-bold text-sm text-slate-700 bg-gradient-to-b from-green-100 to-green-50">
-                        <div className="flex items-center justify-center gap-1">
-                          <span className="text-green-600">📝</span>
-                          <span>IAT2</span>
-                        </div>
-                      </th>
-                      <th className="border-2 border-green-200 px-3 py-5 text-center font-bold text-sm text-slate-700 bg-gradient-to-b from-green-100 to-green-50">
-                        <div className="flex items-center justify-center gap-1">
-                          <span className="text-green-600">📋</span>
-                          <span>MODEL</span>
-                        </div>
-                      </th>
-                      <th className="border-2 border-purple-200 px-3 py-5 text-center font-bold text-sm text-slate-700 bg-gradient-to-b from-purple-100 to-purple-50">
-                        <div className="flex items-center justify-center gap-1">
-                          <span className="text-purple-600">📄</span>
-                          <span>ASSIGNMENT</span>
-                        </div>
-                      </th>
-                      <th className="border-2 border-orange-200 px-3 py-5 text-center font-bold text-sm text-slate-700 bg-gradient-to-b from-orange-100 to-orange-50">
-                        <div className="flex items-center justify-center gap-1">
-                          <span className="text-orange-600">💰</span>
-                          <span>FEES</span>
-                        </div>
-                      </th>
-                      <th className="border-2 border-yellow-200 px-3 py-5 text-center font-bold text-sm text-slate-700 bg-gradient-to-b from-yellow-100 to-yellow-50">
-                        <div className="flex items-center justify-center gap-1">
-                          <span className="text-yellow-600">⏱️</span>
-                          <span>STATUS</span>
-                        </div>
-                      </th>
-                      <th className="border-2 border-indigo-200 px-3 py-5 text-center font-bold text-sm text-slate-700 bg-gradient-to-b from-indigo-100 to-indigo-50">
-                        <div className="flex items-center justify-center gap-1">
-                          <span className="text-indigo-600">✍️</span>
-                          <span>SIGNATURE</span>
-                        </div>
-                      </th>
+                    <tr className="bg-gradient-to-r from-gray-50 to-blue-50">
+                      <th className="border-2 border-gray-300 px-4 py-4 text-center font-bold text-sm text-gray-700 bg-blue-100">Subject</th>
+                      <th className="border-2 border-gray-300 px-3 py-4 text-center font-bold text-sm text-gray-700 bg-green-50">IAT1</th>
+                      <th className="border-2 border-gray-300 px-3 py-4 text-center font-bold text-sm text-gray-700 bg-green-50">IAT2</th>
+                      <th className="border-2 border-gray-300 px-3 py-4 text-center font-bold text-sm text-gray-700 bg-green-50">MODEL</th>
+                      <th className="border-2 border-gray-300 px-3 py-4 text-center font-bold text-sm text-gray-700 bg-purple-50">ASSIGNMENT SUBMISSION</th>
+                      <th className="border-2 border-gray-300 px-3 py-4 text-center font-bold text-sm text-gray-700 bg-orange-50">DEPARTMENTAL FEES</th>
+                      <th className="border-2 border-gray-300 px-3 py-4 text-center font-bold text-sm text-gray-700 bg-yellow-50">DUE STATUS</th>
+                      <th className="border-2 border-gray-300 px-3 py-4 text-center font-bold text-sm text-gray-700 bg-indigo-50">SIGNATURE</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -510,152 +456,106 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
                       const config = getSubjectColumnConfig(subject);
                       const isEven = index % 2 === 0;
                       return (
-                        <tr key={subject} className={`${isEven ? 'bg-gradient-to-r from-white to-blue-50' : 'bg-gradient-to-r from-blue-50 to-white'} hover:bg-gradient-to-r hover:from-blue-100 hover:to-indigo-100 transition-all duration-300 transform hover:scale-[1.01]`}>
-                          <td className="border-2 border-blue-200 px-4 py-5 text-center text-sm font-bold text-slate-800 relative">
-                            <div className="flex items-center justify-center gap-3">
-                              <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full shadow-sm"></div>
-                              <span className="tracking-wide">{subject}</span>
-                              <div className="w-1 h-6 bg-gradient-to-b from-blue-300 to-transparent rounded-full"></div>
+                        <tr key={subject} className={`${isEven ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors duration-200`}>
+                          <td className="border-2 border-gray-300 px-4 py-4 text-center text-sm font-semibold text-gray-800">
+                            <div className="flex items-center justify-center gap-2">
+                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                              {subject}
                             </div>
                           </td>
-                          <td className="border-2 border-green-200 px-3 py-5 text-center text-sm font-medium text-slate-700">
+                          <td className="border-2 border-gray-300 px-3 py-4 text-center text-sm font-medium text-gray-700">
                             {config.showMarks ? (
                               mark?.iat1 !== null && mark?.iat1 !== undefined ? (
-                                <div className="flex flex-col items-center gap-1">
-                                  <span className={`inline-flex items-center justify-center w-10 h-10 rounded-xl text-sm font-bold shadow-lg transform transition-transform hover:scale-110 ${
-                                    mark.iat1 >= 80 ? 'bg-gradient-to-br from-green-400 to-green-600 text-white' :
-                                    mark.iat1 >= 60 ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-white' :
-                                    'bg-gradient-to-br from-red-400 to-red-600 text-white'
-                                  }`}>
-                                    {mark.iat1}
-                                  </span>
-                                  <div className={`w-8 h-1 rounded-full ${
-                                    mark.iat1 >= 80 ? 'bg-green-300' :
-                                    mark.iat1 >= 60 ? 'bg-yellow-300' :
-                                    'bg-red-300'
-                                  }`}></div>
-                                </div>
-                              ) : <span className="text-slate-400 text-lg">—</span>
-                            ) : <span className="text-slate-400 text-lg">—</span>}
+                                <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${
+                                  mark.iat1 >= 80 ? 'bg-green-100 text-green-800' :
+                                  mark.iat1 >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                                  'bg-red-100 text-red-800'
+                                }`}>
+                                  {mark.iat1}
+                                </span>
+                              ) : <span className="text-gray-400">-</span>
+                            ) : <span className="text-gray-400">-</span>}
                           </td>
-                          <td className="border-2 border-green-200 px-3 py-5 text-center text-sm font-medium text-slate-700">
+                          <td className="border-2 border-gray-300 px-3 py-4 text-center text-sm font-medium text-gray-700">
                             {config.showMarks ? (
                               mark?.iat2 !== null && mark?.iat2 !== undefined ? (
-                                <div className="flex flex-col items-center gap-1">
-                                  <span className={`inline-flex items-center justify-center w-10 h-10 rounded-xl text-sm font-bold shadow-lg transform transition-transform hover:scale-110 ${
-                                    mark.iat2 >= 80 ? 'bg-gradient-to-br from-green-400 to-green-600 text-white' :
-                                    mark.iat2 >= 60 ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-white' :
-                                    'bg-gradient-to-br from-red-400 to-red-600 text-white'
-                                  }`}>
-                                    {mark.iat2}
-                                  </span>
-                                  <div className={`w-8 h-1 rounded-full ${
-                                    mark.iat2 >= 80 ? 'bg-green-300' :
-                                    mark.iat2 >= 60 ? 'bg-yellow-300' :
-                                    'bg-red-300'
-                                  }`}></div>
-                                </div>
-                              ) : <span className="text-slate-400 text-lg">—</span>
-                            ) : <span className="text-slate-400 text-lg">—</span>}
+                                <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${
+                                  mark.iat2 >= 80 ? 'bg-green-100 text-green-800' :
+                                  mark.iat2 >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                                  'bg-red-100 text-red-800'
+                                }`}>
+                                  {mark.iat2}
+                                </span>
+                              ) : <span className="text-gray-400">-</span>
+                            ) : <span className="text-gray-400">-</span>}
                           </td>
-                          <td className="border-2 border-green-200 px-3 py-5 text-center text-sm font-medium text-slate-700">
+                          <td className="border-2 border-gray-300 px-3 py-4 text-center text-sm font-medium text-gray-700">
                             {config.showMarks ? (
                               mark?.model !== null && mark?.model !== undefined ? (
-                                <div className="flex flex-col items-center gap-1">
-                                  <span className={`inline-flex items-center justify-center w-10 h-10 rounded-xl text-sm font-bold shadow-lg transform transition-transform hover:scale-110 ${
-                                    mark.model >= 80 ? 'bg-gradient-to-br from-green-400 to-green-600 text-white' :
-                                    mark.model >= 60 ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-white' :
-                                    'bg-gradient-to-br from-red-400 to-red-600 text-white'
-                                  }`}>
-                                    {mark.model}
-                                  </span>
-                                  <div className={`w-8 h-1 rounded-full ${
-                                    mark.model >= 80 ? 'bg-green-300' :
-                                    mark.model >= 60 ? 'bg-yellow-300' :
-                                    'bg-red-300'
-                                  }`}></div>
-                                </div>
-                              ) : <span className="text-slate-400 text-lg">—</span>
-                            ) : <span className="text-slate-400 text-lg">—</span>}
+                                <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${
+                                  mark.model >= 80 ? 'bg-green-100 text-green-800' :
+                                  mark.model >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                                  'bg-red-100 text-red-800'
+                                }`}>
+                                  {mark.model}
+                                </span>
+                              ) : <span className="text-gray-400">-</span>
+                            ) : <span className="text-gray-400">-</span>}
                           </td>
-                          <td className="border-2 border-purple-200 px-3 py-5 text-center text-sm font-medium">
+                          <td className="border-2 border-gray-300 px-3 py-4 text-center text-sm font-medium">
                             {config.showAssignment ? (
                               mark?.assignmentSubmitted ? (
-                                <div className="flex flex-col items-center gap-2">
-                                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg transform transition-transform hover:scale-105">
-                                    <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                                    SUBMITTED
-                                  </span>
-                                  <div className="text-green-600 text-lg">✨</div>
-                                </div>
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">
+                                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                                  Submitted
+                                </span>
                               ) : (
-                                <div className="flex flex-col items-center gap-2">
-                                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold bg-gradient-to-r from-gray-400 to-gray-600 text-white shadow-lg">
-                                    <span className="w-2 h-2 bg-white rounded-full opacity-60"></span>
-                                    PENDING
-                                  </span>
-                                  <div className="text-gray-400 text-lg">⏱️</div>
-                                </div>
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
+                                  <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
+                                  Pending
+                                </span>
                               )
-                            ) : <span className="text-slate-400 text-lg">—</span>}
+                            ) : <span className="text-gray-400">-</span>}
                           </td>
-                          <td className="border-2 border-orange-200 px-3 py-5 text-center text-sm font-medium">
+                          <td className="border-2 border-gray-300 px-3 py-4 text-center text-sm font-medium">
                             {config.showDepartmentFees ? (
                               mark?.departmentFine === 0 ? (
-                                <div className="flex flex-col items-center gap-2">
-                                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg transform transition-transform hover:scale-105">
-                                    <span className="text-white text-sm">💎</span>
-                                    PAID
-                                  </span>
-                                  <div className="text-green-600 text-lg">✅</div>
-                                </div>
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">
+                                  <span className="text-green-500">💰</span>
+                                  Paid
+                                </span>
                               ) : (
-                                <div className="flex flex-col items-center gap-2">
-                                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold bg-gradient-to-r from-red-500 to-red-700 text-white shadow-lg animate-pulse">
-                                    <span className="text-white text-sm">⚡</span>
-                                    NOT PAID
-                                  </span>
-                                  <div className="text-red-600 text-lg">❌</div>
-                                </div>
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800">
+                                  <span className="text-red-500">⚠️</span>
+                                  Not Paid
+                                </span>
                               )
-                            ) : <span className="text-slate-400 text-lg">—</span>}
+                            ) : <span className="text-gray-400">-</span>}
                           </td>
-                          <td className="border-2 border-yellow-200 px-3 py-5 text-center text-sm font-medium">
+                          <td className="border-2 border-gray-300 px-3 py-4 text-center text-sm font-medium">
                             {config.showDueStatus ? (
                               getDueStatusForSubject(subject, mark) === 'Completed' ? (
-                                <div className="flex flex-col items-center gap-2">
-                                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg transform transition-transform hover:scale-105">
-                                    <span className="text-white text-sm">🎯</span>
-                                    COMPLETED
-                                  </span>
-                                  <div className="text-green-600 text-lg">🏆</div>
-                                </div>
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">
+                                  <span className="text-green-500">✅</span>
+                                  Completed
+                                </span>
                               ) : (
-                                <div className="flex flex-col items-center gap-2">
-                                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold bg-gradient-to-r from-yellow-500 to-orange-600 text-white shadow-lg">
-                                    <span className="text-white text-sm">⏰</span>
-                                    PENDING
-                                  </span>
-                                  <div className="text-yellow-600 text-lg">⏳</div>
-                                </div>
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800">
+                                  <span className="text-yellow-500">⏳</span>
+                                  Pending
+                                </span>
                               )
-                            ) : <span className="text-slate-400 text-lg">—</span>}
+                            ) : <span className="text-gray-400">-</span>}
                           </td>
-                          <td className="border-2 border-indigo-200 px-3 py-5 text-center text-sm font-medium">
+                          <td className="border-2 border-gray-300 px-3 py-4 text-center text-sm font-medium">
                             {mark?.signed ? (
-                              <div className="flex flex-col items-center gap-2">
-                                <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 text-white shadow-lg transform transition-transform hover:scale-110">
-                                  <span className="text-xl font-bold">✓</span>
-                                </span>
-                                <div className="text-green-600 text-sm font-bold">SIGNED</div>
-                              </div>
+                              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-800">
+                                <span className="text-lg">✓</span>
+                              </span>
                             ) : (
-                              <div className="flex flex-col items-center gap-2">
-                                <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 text-gray-600 shadow-lg border-2 border-dashed border-gray-400">
-                                  <span className="text-xl">○</span>
-                                </span>
-                                <div className="text-gray-500 text-sm font-medium">PENDING</div>
-                              </div>
+                              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-400">
+                                <span className="text-lg">○</span>
+                              </span>
                             )}
                           </td>
                         </tr>
