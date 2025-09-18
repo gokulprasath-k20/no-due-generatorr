@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from '@/hooks/use-toast';
 import { api } from '@/utils/supabase-api';
 import { getYearFromSemester } from '@/types';
-import { Layout } from './Layout';
 import { Loader2, UserPlus, ArrowLeft } from 'lucide-react';
 
 interface StudentRegistrationProps {
@@ -67,8 +66,7 @@ export function StudentRegistration({ onBack, onRegistrationSuccess }: StudentRe
   };
 
   return (
-    <Layout>
-      <div className="max-w-md mx-auto">
+    <div className="max-w-md mx-auto">
         <Button 
           variant="ghost" 
           onClick={onBack} 
@@ -174,7 +172,6 @@ export function StudentRegistration({ onBack, onRegistrationSuccess }: StudentRe
             </Button>
           </CardContent>
         </Card>
-      </div>
-    </Layout>
+    </div>
   );
 }

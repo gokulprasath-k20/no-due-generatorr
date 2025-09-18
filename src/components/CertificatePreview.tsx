@@ -234,48 +234,55 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
     const element = document.getElementById('certificate');
     if (!element) return;
 
-    // Get the dimensions of the content
-    const width = element.offsetWidth;
-    const height = element.offsetHeight;
+    // Set fixed dimensions for consistent PDF output
+    const originalWidth = element.style.width;
+    const originalMaxWidth = element.style.maxWidth;
     
-    // Calculate the aspect ratio for A4
-    const a4Width = 210; // A4 width in mm
-    const a4Height = 297; // A4 height in mm
-    const imgWidth = a4Width - 20; // Add margins
-    const imgHeight = (height * imgWidth) / width;
+    // Temporarily set certificate to A4 dimensions for capture
+    element.style.width = '210mm';
+    element.style.maxWidth = '210mm';
+    element.style.minHeight = '297mm';
 
-    // Create a canvas for the PDF
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#FFFFFF',
-      logging: false,
-      scrollX: 0,
-      scrollY: 0,
-      windowWidth: width,
-      windowHeight: height
-    });
+    try {
+      // Create a high-quality canvas
+      const canvas = await html2canvas(element, {
+        scale: 3, // Higher scale for better quality
+        useCORS: true,
+        backgroundColor: '#FFFFFF',
+        logging: false,
+        scrollX: 0,
+        scrollY: 0,
+        width: 794, // A4 width in pixels at 96 DPI (210mm)
+        height: 1123, // A4 height in pixels at 96 DPI (297mm)
+        windowWidth: 794,
+        windowHeight: 1123
+      });
 
-    // Create PDF
-    const pdf = new jsPDF({
-      orientation: imgHeight > imgWidth ? 'portrait' : 'landscape',
-      unit: 'mm',
-      format: 'a4'
-    });
+      // Create PDF with exact A4 dimensions
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
 
-    // Add the image to PDF
-    const imgData = canvas.toDataURL('image/png');
-    pdf.addImage(
-      imgData,
-      'PNG',
-      10, // x position (10mm margin)
-      10, // y position (10mm margin)
-      imgWidth,
-      imgHeight
-    );
+      // Add the image to PDF - full page with minimal margins
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      pdf.addImage(
+        imgData,
+        'PNG',
+        5, // Small left margin
+        5, // Small top margin
+        200, // Full width minus margins (210-10)
+        287 // Full height minus margins (297-10)
+      );
 
-    // Save the PDF
-    pdf.save(`no-due-certificate-${student.register_number}.pdf`);
+      // Save the PDF
+      pdf.save(`no-due-certificate-${student.register_number}.pdf`);
+    } finally {
+      // Restore original styles
+      element.style.width = originalWidth;
+      element.style.maxWidth = originalMaxWidth;
+    }
   };
 
   return (
@@ -303,30 +310,58 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
         </div>
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <Button variant="outline" onClick={onBack} className="w-full sm:w-auto">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
-          
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            {onRefresh && (
-              <Button variant="outline" onClick={handleRefresh} disabled={refreshing} className="w-full sm:w-auto">
-                {refreshing ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                )}
-                Refresh
+          {/* Mobile: Icon-only buttons */}
+          <div className="flex sm:hidden justify-between items-center w-full">
+            <Button variant="outline" onClick={onBack} size="sm">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            
+            <div className="flex gap-2">
+              {onRefresh && (
+                <Button variant="outline" onClick={handleRefresh} disabled={refreshing} size="sm">
+                  {refreshing ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4" />
+                  )}
+                </Button>
+              )}
+              <Button variant="outline" onClick={handlePrint} size="sm">
+                <Printer className="h-4 w-4" />
               </Button>
-            )}
-            <Button variant="outline" onClick={handlePrint} className="w-full sm:w-auto">
-              <Printer className="mr-2 h-4 w-4" />
-              Print
+              <Button onClick={handleDownloadPDF} size="sm">
+                <Download className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Desktop: Full buttons with text */}
+          <div className="hidden sm:flex justify-between items-center w-full">
+            <Button variant="outline" onClick={onBack}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
             </Button>
-            <Button onClick={handleDownloadPDF} className="w-full sm:w-auto">
-              <Download className="mr-2 h-4 w-4" />
-              Download PDF
-            </Button>
+            
+            <div className="flex gap-2">
+              {onRefresh && (
+                <Button variant="outline" onClick={handleRefresh} disabled={refreshing}>
+                  {refreshing ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                  )}
+                  Refresh
+                </Button>
+              )}
+              <Button variant="outline" onClick={handlePrint}>
+                <Printer className="mr-2 h-4 w-4" />
+                Print
+              </Button>
+              <Button onClick={handleDownloadPDF}>
+                <Download className="mr-2 h-4 w-4" />
+                Download PDF
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -421,14 +456,14 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
               <table className="w-full border-collapse border border-gray-400 text-xs sm:text-sm">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border border-gray-400 px-1 sm:px-2 md:px-4 py-2 sm:py-3 text-center font-medium text-black">Subject</th>
-                    <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black">IAT1</th>
-                    <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black">IAT2</th>
-                    <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black">Model</th>
-                    <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black hidden sm:table-cell">Assignment</th>
-                    <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black hidden sm:table-cell">Fees</th>
-                    <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black hidden md:table-cell">Status</th>
-                    <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black">Signature</th>
+                    <th className="border border-gray-400 px-1 sm:px-2 md:px-4 py-2 sm:py-3 text-center font-medium text-black text-xs sm:text-sm">Subject</th>
+                    <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black text-xs sm:text-sm">IAT1</th>
+                    <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black text-xs sm:text-sm">IAT2</th>
+                    <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black text-xs sm:text-sm">Model</th>
+                    <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black text-xs sm:text-sm">Assignment</th>
+                    <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black text-xs sm:text-sm">Fees</th>
+                    <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black text-xs sm:text-sm">Status</th>
+                    <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black text-xs sm:text-sm">Signature</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -455,21 +490,21 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
                             mark?.model !== null && mark?.model !== undefined ? mark.model : ''
                           ) : ''}
                         </td>
-                        <td className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center text-black hidden sm:table-cell">
+                        <td className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center text-black">
                           {config.showAssignment ? (
                             mark?.assignmentSubmitted ? 'Submitted' : (
                               <span className="text-red-500 font-bold">X</span>
                             )
                           ) : ''}
                         </td>
-                        <td className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center text-black hidden sm:table-cell">
+                        <td className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center text-black">
                           {config.showDepartmentFees ? (
                             mark?.departmentFine === 0 ? 'Paid' : (
                               <span className="text-red-500 font-bold">X</span>
                             )
                           ) : ''}
                         </td>
-                        <td className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center text-black hidden md:table-cell">
+                        <td className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center text-black">
                           {config.showDueStatus ? (
                             getDueStatusForSubject(subject, mark) === 'Completed' ? 'Completed' : (
                               <span className="text-red-500 font-bold">X</span>
