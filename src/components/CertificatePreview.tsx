@@ -2,10 +2,13 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Student, Mark, SUBJECTS_BY_YEAR, getSubjectsForYearSem } from '@/types';
 import { Layout } from './Layout';
-import { ArrowLeft, Download, Printer } from 'lucide-react';
+import { ArrowLeft, Download, Printer, RefreshCw } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { getSubjectColumnConfig } from '@/utils/subject-config';
+import { api } from '@/utils/supabase-api';
+import { toast } from '@/hooks/use-toast';
+import { useState } from 'react';
 
 // College logo path
 const collegeLogo = '/avs-college-logo.png';
@@ -14,9 +17,11 @@ interface CertificatePreviewProps {
   student: Student;
   marks: Mark[];
   onBack: () => void;
+  onRefresh?: (newMarks: Mark[]) => void;
 }
 
-export function CertificatePreview({ student, marks, onBack }: CertificatePreviewProps) {
+export function CertificatePreview({ student, marks, onBack, onRefresh }: CertificatePreviewProps) {
+  const [refreshing, setRefreshing] = useState(false);
   const subjects = getSubjectsForYearSem(student.year, student.semester);
   
   // Check if any subject needs marks columns (IAT1, IAT2, Model)
@@ -149,6 +154,29 @@ export function CertificatePreview({ student, marks, onBack }: CertificatePrevie
     document.head.removeChild(style);
   };
 
+  const handleRefresh = async () => {
+    if (!onRefresh) return;
+    
+    setRefreshing(true);
+    try {
+      const { marks: refreshedMarks } = await api.getStudentByRegNo(student.register_number);
+      onRefresh(refreshedMarks);
+      toast({
+        title: "Success",
+        description: "Data refreshed successfully",
+      });
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to refresh data",
+        variant: "destructive"
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const handleDownloadPDF = async () => {
     const element = document.getElementById('certificate');
     if (!element) return;
@@ -227,6 +255,10 @@ export function CertificatePreview({ student, marks, onBack }: CertificatePrevie
             Back to Search
           </Button>
           <div className="space-x-2">
+            <Button variant="outline" onClick={handleRefresh} disabled={refreshing}>
+              <RefreshCw className={`mr-2 h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
             <Button variant="outline" onClick={handlePrint}>
               <Printer className="mr-2 h-4 w-4" />
               Print

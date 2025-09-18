@@ -67,6 +67,10 @@ export function StudentPanel() {
     setMarks([]);
   };
 
+  const handleRefresh = (newMarks: Mark[]) => {
+    setMarks(newMarks);
+  };
+
   const handleRegistrationSuccess = (regNumber: string) => {
     setRegisterNumber(regNumber);
     setShowRegistration(false);
@@ -91,7 +95,7 @@ export function StudentPanel() {
   if (showPreview && student) {
     return (
       <Layout showHeader={false}>
-        <CertificatePreview student={student} marks={marks} onBack={handleBack} />
+        <CertificatePreview student={student} marks={marks} onBack={handleBack} onRefresh={handleRefresh} />
       </Layout>
     );
   }
