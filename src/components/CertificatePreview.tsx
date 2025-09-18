@@ -339,8 +339,11 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
             <div className="text-2xl font-bold text-blue-600 mb-2">
               AVS Engineering College
             </div>
-            <div className="text-sm text-gray-600 mb-6">
+            <div className="text-sm text-gray-600 mb-4">
               Salem, Tamil Nadu
+            </div>
+            <div className="text-lg font-semibold text-black mb-4">
+              Department Of Information Technology
             </div>
             <h2 className="text-2xl font-bold text-black mb-6 underline">
               NO DUE CERTIFICATE
@@ -373,12 +376,8 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
                   })}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-black mb-1">Department:</p>
-                  <p className="text-base text-black">{student.department}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-black mb-1">Year:</p>
-                  <p className="text-base text-black">{student.year === 2 ? '2nd Year' : '3rd Year'}</p>
+                  <p className="text-sm font-medium text-black mb-1">Year/Sem:</p>
+                  <p className="text-base text-black">{student.year === 2 ? '2nd Year' : '3rd Year'}{student.semester ? `/${student.semester}` : ''}</p>
                 </div>
               </div>
             </div>
