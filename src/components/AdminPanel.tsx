@@ -263,6 +263,15 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
 
     setSaving(true);
     try {
+      // 1. Save student details (always save to ensure any changes are captured)
+      await api.updateStudent(student.id, {
+        name: student.name,
+        department: student.department,
+        year: student.year,
+        semester: student.semester
+      });
+
+      // 2. Save all marks data
       const marksToSave = marks.map(mark => ({
         subject: mark.subject,
         iat1: mark.iat1,
@@ -273,18 +282,31 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
         signed: mark.signed
       }));
 
-      console.log('Saving marks data:', marksToSave);
-      console.log('Assignment submissions:', marksToSave.map(m => ({ subject: m.subject, assignmentSubmitted: m.assignmentSubmitted })));
+      console.log('Saving student data:', {
+        id: student.id,
+        name: student.name,
+        department: student.department,
+        year: student.year,
+        semester: student.semester
+      });
       
+      console.log('Saving marks data:', marksToSave);
+      
+      // 3. Save marks data
       await api.updateMarks(student.id, marksToSave);
+      
+      // 4. Refresh student data to ensure everything is in sync
+      const { student: updatedStudent, marks: updatedMarks } = await api.getStudentByRegNo(student.register_number);
+      setStudent(updatedStudent);
+      setMarks(updatedMarks);
       
       toast({
         title: "Success",
-        description: "Marks saved successfully",
+        description: "All student data saved successfully",
       });
     } catch (error) {
-      console.error('Error saving marks:', error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to save marks";
+      console.error('Error saving data:', error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to save data";
       toast({
         title: "Error",
         description: errorMessage.includes('column') || errorMessage.includes('does not exist') 

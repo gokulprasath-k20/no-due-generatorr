@@ -128,6 +128,45 @@ export const api = {
     }
   },
 
+  // Student update function
+  async updateStudent(id: string, updates: { name?: string; department?: string; year?: number; semester?: number }): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('students')
+        .update({
+          name: updates.name,
+          department: updates.department,
+          year: updates.year,
+          semester: updates.semester,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
+
+      if (error) {
+        // If semester column doesn't exist, try without it
+        if (error.message.includes('column') && error.message.includes('semester')) {
+          console.warn('Semester column not available, updating student without semester:', error.message);
+          const { error: basicError } = await supabase
+            .from('students')
+            .update({
+              name: updates.name,
+              department: updates.department,
+              year: updates.year,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', id);
+          
+          if (basicError) throw basicError;
+        } else {
+          throw error;
+        }
+      }
+    } catch (error) {
+      console.error('Error updating student:', error);
+      throw error;
+    }
+  },
+
   // Admin functions
   async createStudent(name: string, registerNumber: string, year: number, department: string, semester?: number): Promise<Student> {
     try {
