@@ -534,8 +534,8 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                     studentsBySemester[semester].sort((a, b) => a.name.localeCompare(b.name));
                   });
 
-                  // Sort semesters in order (3rd, 4th, 5th, 6th, 7th, 8th, No Semester)
-                  const semesterOrder = ['3rd Semester', '4th Semester', '5th Semester', '6th Semester', '7th Semester', '8th Semester', 'No Semester'];
+                  // Sort semesters in order (1st, 2nd, 3rd, 4th, 5th, 6th, 7th, 8th, No Semester)
+                  const semesterOrder = ['1st Semester', '2nd Semester', '3rd Semester', '4th Semester', '5th Semester', '6th Semester', '7th Semester', '8th Semester', 'No Semester'];
                   const sortedSemesters = semesterOrder.filter(sem => studentsBySemester[sem]);
 
                   return sortedSemesters.map(semester => (
