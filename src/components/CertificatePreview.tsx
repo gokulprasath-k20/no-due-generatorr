@@ -125,32 +125,80 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
         #certificate table {
           width: 100% !important;
           border-collapse: collapse;
-          font-size: 12px;
+          font-size: 11px;
           page-break-inside: avoid;
-          border: 2px solid #000000;
+          border: 1px solid #d1d5db;
         }
         #certificate th, #certificate td {
-          padding: 8px 6px;
-          border: 2px solid #000000;
+          padding: 6px 4px;
+          border: 1px solid #d1d5db;
           text-align: center;
         }
         #certificate th {
-          background-color: #ffffff;
-          color: #000000;
+          background-color: #f3f4f6 !important;
+          color: #374151 !important;
           font-weight: bold;
-          font-size: 11px;
+          font-size: 10px;
         }
         #certificate td {
-          background-color: #ffffff;
-          color: #000000;
-          font-size: 11px;
-          height: 40px;
+          background-color: #ffffff !important;
+          color: #374151 !important;
+          font-size: 10px;
+          height: 35px;
         }
-        #certificate tr {
-          background-color: #ffffff;
+        #certificate .bg-gradient-to-r {
+          background: #f8fafc !important;
+        }
+        #certificate .rounded-full,
+        #certificate .rounded-lg,
+        #certificate .rounded-xl {
+          border-radius: 4px !important;
+        }
+        #certificate .shadow-lg,
+        #certificate .shadow-sm {
+          box-shadow: none !important;
+        }
+        #certificate .border-4 {
+          border-width: 2px !important;
+        }
+        #certificate .text-3xl {
+          font-size: 1.5rem !important;
+        }
+        #certificate .text-4xl {
+          font-size: 1.8rem !important;
         }
         .no-print, .no-print * {
           display: none !important;
+        }
+        @media print {
+          #certificate .bg-blue-50,
+          #certificate .bg-indigo-50,
+          #certificate .bg-green-50,
+          #certificate .bg-yellow-50,
+          #certificate .bg-orange-50,
+          #certificate .bg-purple-50,
+          #certificate .bg-red-50 {
+            background-color: #f9fafb !important;
+          }
+          #certificate .bg-blue-100,
+          #certificate .bg-green-100,
+          #certificate .bg-yellow-100,
+          #certificate .bg-red-100,
+          #certificate .bg-gray-100 {
+            background-color: #f3f4f6 !important;
+          }
+          #certificate .text-blue-600,
+          #certificate .text-green-600,
+          #certificate .text-yellow-600,
+          #certificate .text-red-600,
+          #certificate .text-gray-600 {
+            color: #374151 !important;
+          }
+          #certificate .bg-blue-600,
+          #certificate .bg-indigo-600 {
+            background-color: #4b5563 !important;
+            color: white !important;
+          }
         }
       }
     `;
@@ -287,123 +335,294 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
           overflowX: 'auto'
         }}>
           {/* Header */}
-          <div className="text-center mb-6 print:mb-4 print:pt-8 print:px-8">
-            <div className="flex flex-col items-center mb-4">
-              <div className="text-2xl font-bold text-blue-800 mb-2">AVS Engineering College</div>
-              <div className="w-32 h-1 bg-blue-600 mb-2"></div>
-              <div className="text-sm text-gray-600">Salem, Tamil Nadu</div>
+          <div className="text-center mb-8 print:mb-6 print:pt-8 print:px-8">
+            <div className="relative">
+              {/* Decorative border */}
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-100 via-blue-50 to-blue-100 rounded-lg opacity-30"></div>
+              <div className="relative bg-white border-4 border-blue-600 rounded-lg p-6 shadow-lg">
+                <div className="flex flex-col items-center">
+                  {/* College logo placeholder */}
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                    <span className="text-white font-bold text-xl">AVS</span>
+                  </div>
+                  <div className="text-3xl font-bold bg-gradient-to-r from-blue-800 to-blue-600 bg-clip-text text-transparent mb-2">
+                    AVS ENGINEERING COLLEGE
+                  </div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-0.5 bg-gradient-to-r from-transparent to-blue-600"></div>
+                    <div className="text-sm text-blue-700 font-medium tracking-wide">SALEM, TAMIL NADU</div>
+                    <div className="w-8 h-0.5 bg-gradient-to-l from-transparent to-blue-600"></div>
+                  </div>
+                  <div className="text-sm text-gray-500 italic">Autonomous Institution</div>
+                </div>
+              </div>
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2 print:text-3xl">
-              NO DUE CERTIFICATE
-            </h2>
-            <div className="w-24 h-1 bg-blue-600 mx-auto mb-6 print:mb-4"></div>
+            
+            {/* Certificate Title */}
+            <div className="mt-8 relative">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-full h-px bg-gradient-to-r from-transparent via-blue-300 to-transparent"></div>
+              </div>
+              <div className="relative bg-white px-8">
+                <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-800 via-blue-600 to-blue-800 bg-clip-text text-transparent tracking-wide">
+                  NO DUE CERTIFICATE
+                </h2>
+              </div>
+            </div>
+            
+            {/* Decorative elements */}
+            <div className="flex justify-center mt-4 space-x-2">
+              <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+              <div className="w-4 h-4 bg-blue-400 rounded-full"></div>
+              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+            </div>
           </div>
 
           {/* Student Details */}
           <div className="mb-8 print:mb-6 print:px-8">
-            <div className="grid grid-cols-2 gap-8 print:gap-12">
-              {/* Left side - Name and Register Number */}
-              <div className="space-y-4">
-                <div className="border-b border-gray-200 pb-1">
-                  <p className="text-xs text-gray-500">Name</p>
-                  <p className="text-base">{student.name}</p>
-                </div>
-                <div className="border-b border-gray-200 pb-1">
-                  <p className="text-xs text-gray-500">Register Number</p>
-                  <p className="text-base font-mono">{student.register_number}</p>
-                </div>
-                {student.semester && (
-                  <div className="border-b border-gray-200 pb-1">
-                    <p className="text-xs text-gray-500">Semester</p>
-                    <p className="text-base">{student.semester}{student.semester === 1 ? 'st' : student.semester === 2 ? 'nd' : student.semester === 3 ? 'rd' : 'th'} Semester</p>
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200 shadow-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left side - Name and Register Number */}
+                <div className="space-y-4">
+                  <div className="bg-white rounded-lg p-4 shadow-sm border-l-4 border-blue-500">
+                    <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-1">Student Name</p>
+                    <p className="text-lg font-bold text-gray-800">{student.name}</p>
                   </div>
-                )}
-              </div>
-              
-              {/* Right side - Date, Department and Year */}
-              <div className="space-y-4">
-                <div className="border-b border-gray-200 pb-1">
-                  <p className="text-xs text-gray-500">Date</p>
-                  <p className="text-base">{new Date().toLocaleDateString()}</p>
+                  <div className="bg-white rounded-lg p-4 shadow-sm border-l-4 border-green-500">
+                    <p className="text-xs font-semibold text-green-600 uppercase tracking-wide mb-1">Register Number</p>
+                    <p className="text-lg font-mono font-bold text-gray-800">{student.register_number}</p>
+                  </div>
+                  {student.semester && (
+                    <div className="bg-white rounded-lg p-4 shadow-sm border-l-4 border-purple-500">
+                      <p className="text-xs font-semibold text-purple-600 uppercase tracking-wide mb-1">Semester</p>
+                      <p className="text-lg font-bold text-gray-800">{student.semester}{student.semester === 1 ? 'st' : student.semester === 2 ? 'nd' : student.semester === 3 ? 'rd' : 'th'} Semester</p>
+                    </div>
+                  )}
                 </div>
-                <div className="border-b border-gray-200 pb-1">
-                  <p className="text-xs text-gray-500">Department</p>
-                  <p className="text-base">{student.department}</p>
-                </div>
-                <div className="border-b border-gray-200 pb-1">
-                  <p className="text-xs text-gray-500">Year</p>
-                  <p className="text-base">{student.year === 2 ? '2nd Year' : '3rd Year'}</p>
+                
+                {/* Right side - Date, Department and Year */}
+                <div className="space-y-4">
+                  <div className="bg-white rounded-lg p-4 shadow-sm border-l-4 border-orange-500">
+                    <p className="text-xs font-semibold text-orange-600 uppercase tracking-wide mb-1">Issue Date</p>
+                    <p className="text-lg font-bold text-gray-800">{new Date().toLocaleDateString('en-IN', { 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}</p>
+                  </div>
+                  <div className="bg-white rounded-lg p-4 shadow-sm border-l-4 border-red-500">
+                    <p className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-1">Department</p>
+                    <p className="text-lg font-bold text-gray-800">{student.department}</p>
+                  </div>
+                  <div className="bg-white rounded-lg p-4 shadow-sm border-l-4 border-indigo-500">
+                    <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wide mb-1">Academic Year</p>
+                    <p className="text-lg font-bold text-gray-800">{student.year === 2 ? '2nd Year' : '3rd Year'}</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Marks Table */}
-          <div className="mb-6 print:mb-4 print:px-8 print:mt-8 overflow-x-auto">
-            <table className="w-full border-collapse border-2 border-black print:text-sm">
-              <thead>
-                <tr className="bg-white">
-                  <th className="border-2 border-black px-3 py-3 text-center font-bold text-sm print:px-3 print:py-2">Subject</th>
-                  <th className="border-2 border-black px-2 py-3 text-center font-bold text-sm print:px-2 print:py-2">IAT1</th>
-                  <th className="border-2 border-black px-2 py-3 text-center font-bold text-sm print:px-2 print:py-2">IAT2</th>
-                  <th className="border-2 border-black px-2 py-3 text-center font-bold text-sm print:px-2 print:py-2">MODEL</th>
-                  <th className="border-2 border-black px-2 py-3 text-center font-bold text-sm print:px-2 print:py-2">ASSIGNMENT SUBMISSION</th>
-                  <th className="border-2 border-black px-2 py-3 text-center font-bold text-sm print:px-2 print:py-2">DEPARTMENTAL FEES</th>
-                  <th className="border-2 border-black px-2 py-3 text-center font-bold text-sm print:px-2 print:py-2">DUE STATUS</th>
-                  <th className="border-2 border-black px-2 py-3 text-center font-bold text-sm print:px-2 print:py-2">SIGNATURE</th>
-                </tr>
-              </thead>
-              <tbody>
-                {subjects.map((subject) => {
-                  const mark = getMarkForSubject(subject);
-                  const config = getSubjectColumnConfig(subject);
-                  return (
-                    <tr key={subject} className="bg-white">
-                      <td className="border-2 border-black px-3 py-4 text-center text-sm print:px-3 print:py-3">{subject}</td>
-                      <td className="border-2 border-black px-2 py-4 text-center text-sm print:px-2 print:py-3">
-                        {config.showMarks ? (mark?.iat1 !== null && mark?.iat1 !== undefined ? mark.iat1 : '') : ''}
-                      </td>
-                      <td className="border-2 border-black px-2 py-4 text-center text-sm print:px-2 print:py-3">
-                        {config.showMarks ? (mark?.iat2 !== null && mark?.iat2 !== undefined ? mark.iat2 : '') : ''}
-                      </td>
-                      <td className="border-2 border-black px-2 py-4 text-center text-sm print:px-2 print:py-3">
-                        {config.showMarks ? (mark?.model !== null && mark?.model !== undefined ? mark.model : '') : ''}
-                      </td>
-                      <td className="border-2 border-black px-2 py-4 text-center text-sm print:px-2 print:py-3">
-                        {config.showAssignment ? (
-                          mark?.assignmentSubmitted ? 'Submitted' : ''
-                        ) : ''}
-                      </td>
-                      <td className="border-2 border-black px-2 py-4 text-center text-sm print:px-2 print:py-3">
-                        {config.showDepartmentFees ? (
-                          mark?.departmentFine === 0 ? 'Paid' : 'Not Paid'
-                        ) : ''}
-                      </td>
-                      <td className="border-2 border-black px-2 py-4 text-center text-sm print:px-2 print:py-3">
-                        {config.showDueStatus ? (
-                          getDueStatusForSubject(subject, mark)
-                        ) : ''}
-                      </td>
-                      <td className="border-2 border-black px-2 py-4 text-center text-sm print:px-2 print:py-3">
-                        {mark?.signed ? '✓' : ''}
-                      </td>
+          <div className="mb-8 print:mb-6 print:px-8 print:mt-8">
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                  <div className="w-6 h-6 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                    <span className="text-sm">📊</span>
+                  </div>
+                  Academic Performance & Clearance Status
+                </h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-gradient-to-r from-gray-50 to-blue-50">
+                      <th className="border-2 border-gray-300 px-4 py-4 text-center font-bold text-sm text-gray-700 bg-blue-100">Subject</th>
+                      <th className="border-2 border-gray-300 px-3 py-4 text-center font-bold text-sm text-gray-700 bg-green-50">IAT1</th>
+                      <th className="border-2 border-gray-300 px-3 py-4 text-center font-bold text-sm text-gray-700 bg-green-50">IAT2</th>
+                      <th className="border-2 border-gray-300 px-3 py-4 text-center font-bold text-sm text-gray-700 bg-green-50">MODEL</th>
+                      <th className="border-2 border-gray-300 px-3 py-4 text-center font-bold text-sm text-gray-700 bg-purple-50">ASSIGNMENT SUBMISSION</th>
+                      <th className="border-2 border-gray-300 px-3 py-4 text-center font-bold text-sm text-gray-700 bg-orange-50">DEPARTMENTAL FEES</th>
+                      <th className="border-2 border-gray-300 px-3 py-4 text-center font-bold text-sm text-gray-700 bg-yellow-50">DUE STATUS</th>
+                      <th className="border-2 border-gray-300 px-3 py-4 text-center font-bold text-sm text-gray-700 bg-indigo-50">SIGNATURE</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody>
+                    {subjects.map((subject, index) => {
+                      const mark = getMarkForSubject(subject);
+                      const config = getSubjectColumnConfig(subject);
+                      const isEven = index % 2 === 0;
+                      return (
+                        <tr key={subject} className={`${isEven ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors duration-200`}>
+                          <td className="border-2 border-gray-300 px-4 py-4 text-center text-sm font-semibold text-gray-800">
+                            <div className="flex items-center justify-center gap-2">
+                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                              {subject}
+                            </div>
+                          </td>
+                          <td className="border-2 border-gray-300 px-3 py-4 text-center text-sm font-medium text-gray-700">
+                            {config.showMarks ? (
+                              mark?.iat1 !== null && mark?.iat1 !== undefined ? (
+                                <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${
+                                  mark.iat1 >= 80 ? 'bg-green-100 text-green-800' :
+                                  mark.iat1 >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                                  'bg-red-100 text-red-800'
+                                }`}>
+                                  {mark.iat1}
+                                </span>
+                              ) : <span className="text-gray-400">-</span>
+                            ) : <span className="text-gray-400">-</span>}
+                          </td>
+                          <td className="border-2 border-gray-300 px-3 py-4 text-center text-sm font-medium text-gray-700">
+                            {config.showMarks ? (
+                              mark?.iat2 !== null && mark?.iat2 !== undefined ? (
+                                <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${
+                                  mark.iat2 >= 80 ? 'bg-green-100 text-green-800' :
+                                  mark.iat2 >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                                  'bg-red-100 text-red-800'
+                                }`}>
+                                  {mark.iat2}
+                                </span>
+                              ) : <span className="text-gray-400">-</span>
+                            ) : <span className="text-gray-400">-</span>}
+                          </td>
+                          <td className="border-2 border-gray-300 px-3 py-4 text-center text-sm font-medium text-gray-700">
+                            {config.showMarks ? (
+                              mark?.model !== null && mark?.model !== undefined ? (
+                                <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${
+                                  mark.model >= 80 ? 'bg-green-100 text-green-800' :
+                                  mark.model >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                                  'bg-red-100 text-red-800'
+                                }`}>
+                                  {mark.model}
+                                </span>
+                              ) : <span className="text-gray-400">-</span>
+                            ) : <span className="text-gray-400">-</span>}
+                          </td>
+                          <td className="border-2 border-gray-300 px-3 py-4 text-center text-sm font-medium">
+                            {config.showAssignment ? (
+                              mark?.assignmentSubmitted ? (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">
+                                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                                  Submitted
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
+                                  <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
+                                  Pending
+                                </span>
+                              )
+                            ) : <span className="text-gray-400">-</span>}
+                          </td>
+                          <td className="border-2 border-gray-300 px-3 py-4 text-center text-sm font-medium">
+                            {config.showDepartmentFees ? (
+                              mark?.departmentFine === 0 ? (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">
+                                  <span className="text-green-500">💰</span>
+                                  Paid
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800">
+                                  <span className="text-red-500">⚠️</span>
+                                  Not Paid
+                                </span>
+                              )
+                            ) : <span className="text-gray-400">-</span>}
+                          </td>
+                          <td className="border-2 border-gray-300 px-3 py-4 text-center text-sm font-medium">
+                            {config.showDueStatus ? (
+                              getDueStatusForSubject(subject, mark) === 'Completed' ? (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">
+                                  <span className="text-green-500">✅</span>
+                                  Completed
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800">
+                                  <span className="text-yellow-500">⏳</span>
+                                  Pending
+                                </span>
+                              )
+                            ) : <span className="text-gray-400">-</span>}
+                          </td>
+                          <td className="border-2 border-gray-300 px-3 py-4 text-center text-sm font-medium">
+                            {mark?.signed ? (
+                              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-800">
+                                <span className="text-lg">✓</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-400">
+                                <span className="text-lg">○</span>
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
 
           {/* Footer */}
-          <div className="mt-12 pt-8 border-t border-gray-200 print:mt-8 print:pt-6 print:px-8 print:absolute print:bottom-8 print:left-0 print:right-0">
-            <div className="flex justify-between items-end">
-              <div className="text-center">
-                <div className="w-32 border-b border-gray-400 mb-2"></div>
-                <p className="text-sm font-medium">CC Signature</p>
+          <div className="mt-12 print:mt-8 print:pt-6 print:px-8">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-end">
+                {/* CC Signature */}
+                <div className="text-center">
+                  <div className="bg-white rounded-lg p-4 shadow-sm border-2 border-dashed border-blue-300 mb-3">
+                    <div className="h-16 flex items-center justify-center">
+                      <span className="text-gray-400 text-sm">Digital Signature</span>
+                    </div>
+                  </div>
+                  <div className="bg-blue-600 text-white px-4 py-2 rounded-lg">
+                    <p className="text-sm font-bold">Class Coordinator</p>
+                    <p className="text-xs opacity-90">Signature & Seal</p>
+                  </div>
+                </div>
+                
+                {/* Certificate Validity */}
+                <div className="text-center">
+                  <div className="bg-white rounded-lg p-4 shadow-sm border border-green-200">
+                    <div className="text-green-600 mb-2">
+                      <span className="text-2xl">🏆</span>
+                    </div>
+                    <p className="text-sm font-bold text-green-800">Certificate Valid</p>
+                    <p className="text-xs text-green-600">Digitally Verified</p>
+                    <div className="mt-2 text-xs text-gray-500">
+                      ID: {student.register_number}-{new Date().getFullYear()}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* HOD Signature */}
+                <div className="text-center">
+                  <div className="bg-white rounded-lg p-4 shadow-sm border-2 border-dashed border-indigo-300 mb-3">
+                    <div className="h-16 flex items-center justify-center">
+                      <span className="text-gray-400 text-sm">Digital Signature</span>
+                    </div>
+                  </div>
+                  <div className="bg-indigo-600 text-white px-4 py-2 rounded-lg">
+                    <p className="text-sm font-bold">Head of Department</p>
+                    <p className="text-xs opacity-90">Signature & Seal</p>
+                  </div>
+                </div>
               </div>
-              <div className="text-center">
-                <div className="w-32 border-b border-gray-400 mb-2"></div>
-                <p className="text-sm font-medium">HOD Signature</p>
+              
+              {/* Bottom border decoration */}
+              <div className="mt-6 flex justify-center">
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-px bg-gradient-to-r from-transparent to-blue-400"></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <div className="w-16 h-px bg-blue-400"></div>
+                  <div className="text-xs text-blue-600 font-medium px-3">AVS ENGINEERING COLLEGE</div>
+                  <div className="w-16 h-px bg-blue-400"></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <div className="w-8 h-px bg-gradient-to-l from-transparent to-blue-400"></div>
+                </div>
               </div>
             </div>
           </div>
