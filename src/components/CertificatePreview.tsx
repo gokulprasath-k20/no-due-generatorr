@@ -352,7 +352,7 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
 
           {/* Student Details */}
           <div className="mb-8 print:mb-6 print:px-8">
-            <div className="grid grid-cols-2 gap-8">
+            <div className="flex justify-between items-start">
               {/* Left side */}
               <div className="space-y-4">
                 <div>
@@ -366,7 +366,7 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
               </div>
               
               {/* Right side */}
-              <div className="space-y-4">
+              <div className="space-y-4 text-right">
                 <div>
                   <p className="text-sm font-medium text-black mb-1">Date:</p>
                   <p className="text-base text-black">{new Date().toLocaleDateString('en-GB', { 
@@ -393,6 +393,8 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
                     <th className="border border-gray-400 px-3 py-3 text-center font-medium text-sm text-black">IAT1</th>
                     <th className="border border-gray-400 px-3 py-3 text-center font-medium text-sm text-black">IAT2</th>
                     <th className="border border-gray-400 px-3 py-3 text-center font-medium text-sm text-black">Model</th>
+                    <th className="border border-gray-400 px-3 py-3 text-center font-medium text-sm text-black">Assignment Submission</th>
+                    <th className="border border-gray-400 px-3 py-3 text-center font-medium text-sm text-black">Department Fees</th>
                     <th className="border border-gray-400 px-3 py-3 text-center font-medium text-sm text-black">Signature</th>
                   </tr>
                 </thead>
@@ -418,6 +420,20 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
                         <td className="border border-gray-400 px-3 py-3 text-center text-sm text-black">
                           {config.showMarks ? (
                             mark?.model !== null && mark?.model !== undefined ? mark.model : ''
+                          ) : ''}
+                        </td>
+                        <td className="border border-gray-400 px-3 py-3 text-center text-sm text-black">
+                          {config.showAssignment ? (
+                            mark?.assignmentSubmitted ? 'Submitted' : (
+                              <span className="text-red-500 font-bold">X</span>
+                            )
+                          ) : ''}
+                        </td>
+                        <td className="border border-gray-400 px-3 py-3 text-center text-sm text-black">
+                          {config.showDepartmentFees ? (
+                            mark?.departmentFine === 0 ? 'Paid' : (
+                              <span className="text-red-500 font-bold">X</span>
+                            )
                           ) : ''}
                         </td>
                         <td className="border border-gray-400 px-3 py-3 text-center text-sm text-black">
