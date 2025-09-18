@@ -756,18 +756,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                             </span>
                           </td>
                           <td className="border border-gray-300 px-2 py-2 text-center">
-                            <Select
-                              value={getSignatureStatus(subject) ? 'signed' : 'pending'}
-                              onValueChange={(value) => updateSignature(subject, value === 'signed')}
-                            >
-                              <SelectTrigger className="w-full">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="signed">Signed</SelectItem>
-                                <SelectItem value="pending">Pending</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            {/* Signature column kept empty in admin panel */}
                           </td>
                         </tr>
                       );

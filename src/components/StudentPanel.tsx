@@ -68,6 +68,7 @@ export function StudentPanel() {
   };
 
   const handleRefresh = (newMarks: Mark[]) => {
+    console.log('StudentPanel: Updating marks with refreshed data:', newMarks);
     setMarks(newMarks);
   };
 

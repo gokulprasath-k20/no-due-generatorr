@@ -217,17 +217,22 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
     
     setRefreshing(true);
     try {
-      const { marks: refreshedMarks } = await api.getStudentByRegNo(student.register_number);
+      console.log('Refreshing data for student:', student.register_number);
+      const { student: refreshedStudent, marks: refreshedMarks } = await api.getStudentByRegNo(student.register_number);
+      
+      console.log('Refreshed marks:', refreshedMarks);
+      console.log('Current marks before refresh:', marks);
+      
       onRefresh(refreshedMarks);
       toast({
         title: "Success",
-        description: "Data refreshed successfully",
+        description: `Data refreshed successfully. Found ${refreshedMarks.length} records.`,
       });
     } catch (error) {
       console.error('Error refreshing data:', error);
       toast({
         title: "Error",
-        description: "Failed to refresh data",
+        description: "Failed to refresh data. Please try again.",
         variant: "destructive"
       });
     } finally {
