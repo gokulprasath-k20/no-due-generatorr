@@ -163,16 +163,19 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   };
 
   const updateAssignmentSubmission = (subject: string, submitted: boolean) => {
+    console.log(`Updating assignment submission for ${subject}: ${submitted}`);
     setMarks(prev => {
       const existing = prev.find(m => m.subject === subject);
       if (existing) {
-        return prev.map(m => 
+        const updated = prev.map(m => 
           m.subject === subject 
             ? { ...m, assignmentSubmitted: submitted }
             : m
         );
+        console.log(`Updated marks for ${subject}:`, updated.find(m => m.subject === subject));
+        return updated;
       } else {
-        return [...prev, {
+        const newMark = {
           id: '',
           student_id: student!.id,
           subject,
@@ -183,7 +186,9 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
           assignmentSubmitted: submitted,
           departmentFine: 0,
           created_at: new Date().toISOString()
-        }];
+        };
+        console.log(`Created new mark for ${subject}:`, newMark);
+        return [...prev, newMark];
       }
     });
   };
@@ -268,6 +273,9 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
         signed: mark.signed
       }));
 
+      console.log('Saving marks data:', marksToSave);
+      console.log('Assignment submissions:', marksToSave.map(m => ({ subject: m.subject, assignmentSubmitted: m.assignmentSubmitted })));
+      
       await api.updateMarks(student.id, marksToSave);
       
       toast({
