@@ -163,18 +163,22 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   };
 
   const updateAssignmentSubmission = (subject: string, submitted: boolean) => {
-    console.log(`Updating assignment submission for ${subject}: ${submitted}`);
+    console.log(`[DEBUG] Updating assignment submission for ${subject} to:`, submitted);
+    
     setMarks(prev => {
-      const existing = prev.find(m => m.subject === subject);
-      if (existing) {
-        const updated = prev.map(m => 
-          m.subject === subject 
-            ? { ...m, assignmentSubmitted: submitted }
-            : m
-        );
-        console.log(`Updated marks for ${subject}:`, updated.find(m => m.subject === subject));
-        return updated;
+      const existingIndex = prev.findIndex(m => m.subject === subject);
+      
+      if (existingIndex >= 0) {
+        // Update existing mark
+        const updatedMarks = [...prev];
+        updatedMarks[existingIndex] = {
+          ...updatedMarks[existingIndex],
+          assignmentSubmitted: submitted
+        };
+        console.log(`[DEBUG] Updated existing mark for ${subject}:`, updatedMarks[existingIndex]);
+        return updatedMarks;
       } else {
+        // Create new mark entry
         const newMark = {
           id: '',
           student_id: student!.id,
@@ -185,9 +189,10 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
           signed: false,
           assignmentSubmitted: submitted,
           departmentFine: 0,
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         };
-        console.log(`Created new mark for ${subject}:`, newMark);
+        console.log(`[DEBUG] Created new mark entry for ${subject}:`, newMark);
         return [...prev, newMark];
       }
     });
@@ -262,41 +267,48 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
     if (!student) return;
 
     setSaving(true);
+    console.log('[DEBUG] Starting to save marks...');
+    
     try {
-      // 1. Save student details (always save to ensure any changes are captured)
+      // 1. Prepare marks data with proper field names
+      const marksToSave = marks.map(mark => {
+        const markData: any = {
+          subject: mark.subject,
+          iat1: mark.iat1,
+          iat2: mark.iat2,
+          model: mark.model,
+          signed: mark.signed,
+          department_fine: mark.departmentFine ?? 0,
+          assignmentSubmitted: mark.assignmentSubmitted ?? false
+        };
+        
+        console.log(`[DEBUG] Preparing mark for ${mark.subject}:`, {
+          ...markData,
+          assignmentSubmitted: mark.assignmentSubmitted
+        });
+        
+        return markData;
+      });
+
+      console.log('[DEBUG] Saving marks data:', marksToSave);
+      
+      // 2. Save marks data first
+      await api.updateMarks(student.id, marksToSave);
+      
+      // 3. Save student details
       await api.updateStudent(student.id, {
         name: student.name,
         department: student.department,
         year: student.year,
         semester: student.semester
       });
-
-      // 2. Save all marks data
-      const marksToSave = marks.map(mark => ({
-        subject: mark.subject,
-        iat1: mark.iat1,
-        iat2: mark.iat2,
-        model: mark.model,
-        assignmentSubmitted: mark.assignmentSubmitted,
-        departmentFine: mark.departmentFine,
-        signed: mark.signed
-      }));
-
-      console.log('Saving student data:', {
-        id: student.id,
-        name: student.name,
-        department: student.department,
-        year: student.year,
-        semester: student.semester
-      });
       
-      console.log('Saving marks data:', marksToSave);
-      
-      // 3. Save marks data
-      await api.updateMarks(student.id, marksToSave);
+      console.log('[DEBUG] Data saved successfully, refreshing...');
       
       // 4. Refresh student data to ensure everything is in sync
       const { student: updatedStudent, marks: updatedMarks } = await api.getStudentByRegNo(student.register_number);
+      console.log('[DEBUG] Refreshed data:', { updatedStudent, updatedMarks });
+      
       setStudent(updatedStudent);
       setMarks(updatedMarks);
       
@@ -540,14 +552,18 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                             {shouldShowMarksColumns(subject) ? (
                               <Select
                                 value={getAssignmentStatus(subject) ? 'submitted' : 'not-submitted'}
-                                onValueChange={(value) => updateAssignmentSubmission(subject, value === 'submitted')}
+                                onValueChange={(value) => {
+                                  const isSubmitted = value === 'submitted';
+                                  console.log(`Assignment ${subject} submission set to:`, isSubmitted);
+                                  updateAssignmentSubmission(subject, isSubmitted);
+                                }}
                               >
                                 <SelectTrigger className="w-full">
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="submitted">Submit</SelectItem>
-                                  <SelectItem value="not-submitted">Not Submit</SelectItem>
+                                  <SelectItem value="submitted">Submitted</SelectItem>
+                                  <SelectItem value="not-submitted">Not Submitted</SelectItem>
                                 </SelectContent>
                               </Select>
                             ) : (
