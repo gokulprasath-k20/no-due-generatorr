@@ -20,6 +20,14 @@ interface CertificatePreviewProps {
   onRefresh?: (newMarks: Mark[]) => void;
 }
 
+// Helper function to format ordinal numbers
+const getOrdinalSuffix = (num: number): string => {
+  if (num === 1) return '1st';
+  if (num === 2) return '2nd';
+  if (num === 3) return '3rd';
+  return `${num}th`;
+};
+
 export function CertificatePreview({ student, marks, onBack, onRefresh }: CertificatePreviewProps) {
   const [refreshing, setRefreshing] = useState(false);
   const subjects = getSubjectsForYearSem(student.year, student.semester);
@@ -454,7 +462,7 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
                 </div>
                 <div>
                   <p className="text-xs sm:text-sm font-medium text-black mb-1">Year/Sem:</p>
-                  <p className="text-sm sm:text-base text-black">{student.year === 2 ? '2nd' : '3rd'} / {student.semester ? `${student.semester}th` : ''}</p>
+                  <p className="text-sm sm:text-base text-black">{getOrdinalSuffix(student.year)} / {student.semester ? getOrdinalSuffix(student.semester) : ''}</p>
                 </div>
               </div>
             </div>

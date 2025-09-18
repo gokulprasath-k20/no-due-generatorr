@@ -22,6 +22,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   const [saving, setSaving] = useState(false);
   const [allStudents, setAllStudents] = useState<Student[]>([]);
   const [loadingStudents, setLoadingStudents] = useState(false);
+  const [selectedSemesterFilter, setSelectedSemesterFilter] = useState<string>('all');
   
   // New student form
   const [showNewStudent, setShowNewStudent] = useState(false);
@@ -40,6 +41,16 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
     setLoadingStudents(true);
     try {
       const students = await api.getAllStudents();
+      console.log('AdminPanel: Fetched students from database:', students);
+      console.log('AdminPanel: Total students count:', students.length);
+      students.forEach((student, index) => {
+        console.log(`Student ${index + 1}:`, {
+          name: student.name,
+          register_number: student.register_number,
+          semester: student.semester,
+          year: student.year
+        });
+      });
       setAllStudents(students);
     } catch (error) {
       console.error('Error fetching students:', error);
@@ -395,6 +406,23 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
     return mark?.signed ?? false;
   };
 
+  // Filter students based on selected semester
+  const getFilteredStudents = (): Student[] => {
+    if (selectedSemesterFilter === 'all') {
+      return allStudents;
+    }
+    const semesterNumber = parseInt(selectedSemesterFilter);
+    return allStudents.filter(student => student.semester === semesterNumber);
+  };
+
+  // Helper function to format ordinal numbers
+  const getOrdinalSuffix = (num: string): string => {
+    if (num === '1') return '1st';
+    if (num === '2') return '2nd';
+    if (num === '3') return '3rd';
+    return `${num}th`;
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 px-2 sm:px-4">
         {/* Header */}
@@ -433,10 +461,48 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
         {/* Registered Students List - Semester Wise */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Search className="h-5 w-5" />
-              Registered Students ({allStudents.length})
-            </CardTitle>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <CardTitle className="flex items-center gap-2">
+                <Search className="h-5 w-5" />
+                Registered Students ({getFilteredStudents().length})
+              </CardTitle>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <Label className="text-sm font-medium">Filter by Semester:</Label>
+                  <Select
+                    value={selectedSemesterFilter}
+                    onValueChange={setSelectedSemesterFilter}
+                  >
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Semesters</SelectItem>
+                      <SelectItem value="1">1st Semester</SelectItem>
+                      <SelectItem value="2">2nd Semester</SelectItem>
+                      <SelectItem value="3">3rd Semester</SelectItem>
+                      <SelectItem value="4">4th Semester</SelectItem>
+                      <SelectItem value="5">5th Semester</SelectItem>
+                      <SelectItem value="6">6th Semester</SelectItem>
+                      <SelectItem value="7">7th Semester</SelectItem>
+                      <SelectItem value="8">8th Semester</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={fetchAllStudents}
+                  disabled={loadingStudents}
+                >
+                  {loadingStudents ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    'Refresh'
+                  )}
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             {loadingStudents ? (
@@ -444,16 +510,17 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                 <Loader2 className="h-6 w-6 animate-spin" />
                 <span className="ml-2">Loading students...</span>
               </div>
-            ) : allStudents.length === 0 ? (
+            ) : getFilteredStudents().length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                No registered students found
+                {selectedSemesterFilter === 'all' ? 'No registered students found' : `No students found for ${getOrdinalSuffix(selectedSemesterFilter)} semester`}
               </div>
             ) : (
               <div className="space-y-6">
                 {/* Group students by semester and sort alphabetically */}
                 {(() => {
-                  // Group students by semester
-                  const studentsBySemester = allStudents.reduce((acc, student) => {
+                  // Group filtered students by semester
+                  const filteredStudents = getFilteredStudents();
+                  const studentsBySemester = filteredStudents.reduce((acc, student) => {
                     const semesterKey = student.semester ? `${student.semester}th Semester` : 'No Semester';
                     if (!acc[semesterKey]) {
                       acc[semesterKey] = [];

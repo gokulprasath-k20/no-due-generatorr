@@ -75,6 +75,7 @@ export const api = {
 
   async getAllStudents(): Promise<Student[]> {
     try {
+      console.log('API: Fetching all students from database...');
       const { data, error } = await supabase
         .from('students')
         .select('*')
@@ -85,6 +86,9 @@ export const api = {
         throw new Error(`Database error: ${error.message}`);
       }
 
+      console.log('API: Raw data from database:', data);
+      console.log('API: Number of students found:', data?.length || 0);
+      
       return data || [];
     } catch (error) {
       console.error('Error in getAllStudents:', error);
