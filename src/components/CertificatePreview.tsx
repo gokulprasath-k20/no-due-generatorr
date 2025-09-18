@@ -135,8 +135,9 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
           text-align: center;
         }
         #certificate th:last-child, #certificate td:last-child {
-          min-width: 80px;
-          width: 100px;
+          min-width: 120px;
+          width: 140px;
+          padding: 6px 8px;
         }
         #certificate th {
           background-color: #f3f4f6 !important;
@@ -467,7 +468,7 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
                     <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black text-xs sm:text-sm">Assignment</th>
                     <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black text-xs sm:text-sm">Department Fees</th>
                     <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black text-xs sm:text-sm">Status</th>
-                    <th className="border border-gray-400 px-1 sm:px-2 md:px-4 lg:px-6 py-2 sm:py-3 text-center font-medium text-black text-xs sm:text-sm min-w-[80px] sm:min-w-[100px]">Signature</th>
+                    <th className="border border-gray-400 px-2 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 text-center font-medium text-black text-xs sm:text-sm min-w-[100px] sm:min-w-[120px] md:min-w-[140px]">Signature</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -502,7 +503,9 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
                           ) : ''}
                         </td>
                         <td className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center text-black">
-                          {/* Department fees column kept empty in certificate */}
+                          {config.showDepartmentFees ? (
+                            mark?.departmentFine === 0 ? 'Paid' : 'Unpaid'
+                          ) : ''}
                         </td>
                         <td className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center text-black">
                           {config.showDueStatus ? (
@@ -511,7 +514,7 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
                             )
                           ) : ''}
                         </td>
-                        <td className="border border-gray-400 px-1 sm:px-2 md:px-4 lg:px-6 py-2 sm:py-3 text-center text-black min-w-[80px] sm:min-w-[100px]">
+                        <td className="border border-gray-400 px-2 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 text-center text-black min-w-[100px] sm:min-w-[120px] md:min-w-[140px]">
                           {mark?.signed ? '' : (
                             <span className="text-red-500 font-bold">X</span>
                           )}
