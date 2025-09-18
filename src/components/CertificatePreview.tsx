@@ -395,6 +395,7 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
                     <th className="border border-gray-400 px-3 py-3 text-center font-medium text-sm text-black">Model</th>
                     <th className="border border-gray-400 px-3 py-3 text-center font-medium text-sm text-black">Assignment Submission</th>
                     <th className="border border-gray-400 px-3 py-3 text-center font-medium text-sm text-black">Department Fees</th>
+                    <th className="border border-gray-400 px-3 py-3 text-center font-medium text-sm text-black">Status</th>
                     <th className="border border-gray-400 px-3 py-3 text-center font-medium text-sm text-black">Signature</th>
                   </tr>
                 </thead>
@@ -432,6 +433,13 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
                         <td className="border border-gray-400 px-3 py-3 text-center text-sm text-black">
                           {config.showDepartmentFees ? (
                             mark?.departmentFine === 0 ? 'Paid' : (
+                              <span className="text-red-500 font-bold">X</span>
+                            )
+                          ) : ''}
+                        </td>
+                        <td className="border border-gray-400 px-3 py-3 text-center text-sm text-black">
+                          {config.showDueStatus ? (
+                            getDueStatusForSubject(subject, mark) === 'Completed' ? 'Completed' : (
                               <span className="text-red-500 font-bold">X</span>
                             )
                           ) : ''}
