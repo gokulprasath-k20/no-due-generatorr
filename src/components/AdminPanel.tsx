@@ -195,6 +195,15 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
     }
 
     try {
+      console.log('AdminPanel: Starting student registration...');
+      console.log('AdminPanel: Registration data:', {
+        name: newStudentName.trim(),
+        regNo: newStudentRegNo.trim(),
+        year: parseInt(newStudentYear),
+        department: newStudentDept,
+        semester: parseInt(newStudentSem)
+      });
+      
       // Use registerStudent instead of createStudent
       await api.registerStudent(
         newStudentName.trim(),
@@ -220,10 +229,13 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
       // Refresh student list or search
       await searchStudent();
     } catch (error) {
-      console.error('Error registering student:', error);
+      console.error('AdminPanel: Student registration failed:', error);
+      console.error('AdminPanel: Error type:', typeof error);
+      console.error('AdminPanel: Error details:', error instanceof Error ? { message: error.message, stack: error.stack } : error);
+      
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to register student",
+        description: error instanceof Error ? error.message : "Failed to create student",
         variant: "destructive"
       });
     } finally {

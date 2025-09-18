@@ -41,8 +41,10 @@ export function StudentRegistration({ onBack, onRegistrationSuccess }: StudentRe
 
     setLoading(true);
     try {
+      console.log('StudentRegistration: Starting registration process...');
       const semesterNum = parseInt(semester);
       const year = getYearFromSemester(semesterNum);
+      console.log('StudentRegistration: Calling API with:', { name: name.trim(), registerNumber: registerNumber.trim(), year, department, semesterNum });
       await api.registerStudent(name.trim(), registerNumber.trim(), year, department, semesterNum);
       
       toast({
@@ -53,11 +55,13 @@ export function StudentRegistration({ onBack, onRegistrationSuccess }: StudentRe
       // Automatically log them in after successful registration
       onRegistrationSuccess(registerNumber.trim());
     } catch (error) {
-      console.error('Registration error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to register student';
+      console.error('StudentRegistration: Registration failed:', error);
+      console.error('StudentRegistration: Error type:', typeof error);
+      console.error('StudentRegistration: Error details:', error instanceof Error ? { message: error.message, stack: error.stack } : error);
+      
       toast({
         title: "Registration Failed",
-        description: errorMessage,
+        description: error instanceof Error ? error.message : "An error occurred during registration",
         variant: "destructive"
       });
     } finally {

@@ -4,6 +4,7 @@ import { Student, Mark, SUBJECTS_BY_YEAR, getSubjectsForYearSem } from '@/types'
 export const api = {
   // Student functions
   async registerStudent(name: string, registerNumber: string, year: number, department: string, semester?: number): Promise<Student> {
+    console.log('API: Registration attempt #', Date.now(), 'for:', { name, registerNumber, year, department, semester });
     // Check if student already exists
     const { data: existingStudent } = await supabase
       .from('students')
@@ -46,7 +47,11 @@ export const api = {
       error = result.error;
     }
 
-    if (error) throw error;
+    if (error) {
+      console.error('API: Registration failed with error:', error);
+      console.error('API: Error details:', { message: error.message, code: error.code, details: error.details, hint: error.hint });
+      throw error;
+    }
 
     // Create empty marks for all subjects based on year and semester
     const subjects = getSubjectsForYearSem(year, semester);
@@ -66,7 +71,8 @@ export const api = {
       .insert(marksToInsert);
 
     if (marksError) {
-      console.error('Error creating marks:', marksError);
+      console.error('API: Error creating marks:', marksError);
+      console.error('API: Marks error details:', { message: marksError.message, code: marksError.code, details: marksError.details, hint: marksError.hint });
       // Don't throw error for marks creation failure in registration
     }
 
