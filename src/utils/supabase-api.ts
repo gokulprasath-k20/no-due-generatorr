@@ -238,68 +238,30 @@ export const api = {
   async updateMarks(studentId: string, marks: Array<{ subject: string; iat1?: number; iat2?: number; model?: number; signed?: boolean; assignmentSubmitted?: boolean; departmentFine?: number }>): Promise<void> {
     try {
       for (const mark of marks) {
-        // First, try with all fields
-        let { error } = await supabase
+        // Prepare the data with proper column names
+        const markData: any = {
+          student_id: studentId,
+          subject: mark.subject,
+          iat1: mark.iat1 ?? null,
+          iat2: mark.iat2 ?? null,
+          model: mark.model ?? null,
+          signed: mark.signed ?? false,
+          department_fine: mark.departmentFine ?? 0
+        };
+
+        // Add assignmentSubmitted with the correct case sensitivity
+        markData['assignmentSubmitted'] = mark.assignmentSubmitted ?? false;
+
+        // Try direct update first
+        const { error } = await supabase
           .from('marks')
-          .upsert({
-            student_id: studentId,
-            subject: mark.subject,
-            iat1: mark.iat1 ?? null,
-            iat2: mark.iat2 ?? null,
-            model: mark.model ?? null,
-            signed: mark.signed ?? false,
-            assignmentSubmitted: mark.assignmentSubmitted ?? false,
-            departmentFine: mark.departmentFine ?? 0
-          }, {
+          .upsert(markData, {
             onConflict: 'student_id,subject'
           });
 
-        // If error due to missing columns, try with basic fields only
-        if (error && (error.message.includes('column') || error.message.includes('does not exist'))) {
-          console.warn('New columns not available, trying with available fields:', error.message);
-          
-          // Try with assignmentSubmitted included (it might exist even if other columns don't)
-          let { error: basicError } = await supabase
-            .from('marks')
-            .upsert({
-              student_id: studentId,
-              subject: mark.subject,
-              iat1: mark.iat1 ?? null,
-              iat2: mark.iat2 ?? null,
-              model: mark.model ?? null,
-              signed: mark.signed ?? false,
-              assignmentSubmitted: mark.assignmentSubmitted ?? false
-            }, {
-              onConflict: 'student_id,subject'
-            });
-          
-          // If still error, try with minimal fields only
-          if (basicError && (basicError.message.includes('column') || basicError.message.includes('does not exist'))) {
-            console.warn('assignmentSubmitted column not available, using minimal fields:', basicError.message);
-            const { error: minimalError } = await supabase
-              .from('marks')
-              .upsert({
-                student_id: studentId,
-                subject: mark.subject,
-                iat1: mark.iat1 ?? null,
-                iat2: mark.iat2 ?? null,
-                model: mark.model ?? null,
-                signed: mark.signed ?? false
-              }, {
-                onConflict: 'student_id,subject'
-              });
-            
-            if (minimalError) {
-              console.error('Supabase error updating marks (minimal):', minimalError);
-              throw new Error(`Database error: ${minimalError.message}`);
-            }
-          } else if (basicError) {
-            console.error('Supabase error updating marks (basic):', basicError);
-            throw new Error(`Database error: ${basicError.message}`);
-          }
-        } else if (error) {
-          console.error('Supabase error updating marks:', error);
-          throw new Error(`Database error: ${error.message}`);
+        if (error) {
+          console.error('Error updating marks:', error);
+          throw new Error(`Failed to update marks: ${error.message}`);
         }
       }
     } catch (error) {
