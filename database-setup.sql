@@ -13,7 +13,7 @@ CREATE TABLE students (
     register_number TEXT UNIQUE NOT NULL,
     department TEXT NOT NULL,
     year INTEGER NOT NULL CHECK (year IN (2, 3)),
-    semester INTEGER CHECK (semester IN (3, 4, 5)),
+    semester INTEGER CHECK (semester BETWEEN 3 AND 8),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

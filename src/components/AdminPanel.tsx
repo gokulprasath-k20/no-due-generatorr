@@ -100,7 +100,8 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
     }
 
     try {
-      await api.createStudent(
+      // Use registerStudent instead of createStudent
+      await api.registerStudent(
         newStudentName.trim(),
         newStudentRegNo.trim(),
         parseInt(newStudentYear),
@@ -110,7 +111,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
       
       toast({
         title: "Success",
-        description: "Student created successfully"
+        description: "Student registered successfully"
       });
       
       // Reset form and hide
@@ -124,10 +125,10 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
       // Refresh student list or search
       await searchStudent();
     } catch (error) {
-      console.error('Error creating student:', error);
+      console.error('Error registering student:', error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create student",
+        description: error instanceof Error ? error.message : "Failed to register student",
         variant: "destructive"
       });
     } finally {
