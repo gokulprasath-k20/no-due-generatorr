@@ -65,13 +65,14 @@ export const api = {
         return { student: null, marks: [] };
       }
 
-      // Create a properly typed student object with department
+      // Create a properly typed student object with department and semester
       const student: Student = {
         id: data.id,
         name: data.name,
         register_number: data.register_number,
         department: data.department || 'Not Specified',
         year: data.year,
+        semester: data.semester,
         created_at: data.created_at
       };
 
@@ -147,7 +148,10 @@ export const api = {
         subject,
         iat1: null,
         iat2: null,
-        model: null
+        model: null,
+        signed: false,
+        assignmentSubmitted: false,
+        departmentFine: 0
       }));
 
       const { error: marksError } = await supabase

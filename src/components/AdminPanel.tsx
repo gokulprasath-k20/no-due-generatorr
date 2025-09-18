@@ -69,6 +69,10 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
       setMarks(foundMarks);
       setShowNewStudent(false);
       
+      // Debug logging
+      console.log('Found student:', foundStudent);
+      console.log('Found marks:', foundMarks);
+      
       toast({
         title: "Success",
         description: `Found student: ${foundStudent.name}`,

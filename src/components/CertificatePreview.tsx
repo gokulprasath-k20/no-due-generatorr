@@ -28,6 +28,14 @@ export function CertificatePreview({ student, marks, onBack }: CertificatePrevie
   // Check if any subject needs due status column
   const hasAnyDueStatusColumns = subjects.some(subject => getSubjectColumnConfig(subject).showDueStatus);
   
+  // Debug logging
+  console.log('Subjects:', subjects);
+  console.log('Has marks columns:', hasAnyMarksColumns);
+  console.log('Has assignment columns:', hasAnyAssignmentColumns);
+  console.log('Has department fees columns:', hasAnyDepartmentFeesColumns);
+  console.log('Has due status columns:', hasAnyDueStatusColumns);
+  console.log('Marks data:', marks);
+  
   const getMarkForSubject = (subject: string) => {
     const mark = marks.find(mark => mark.subject === subject);
     // Create a default mark object if not found
@@ -39,15 +47,16 @@ export function CertificatePreview({ student, marks, onBack }: CertificatePrevie
         iat1: null,
         iat2: null,
         model: null,
-        signed: null,
-        assignmentSubmitted: null,
+        signed: false,
+        assignmentSubmitted: false,
         departmentFine: 0,
         created_at: new Date().toISOString()
       };
     }
-    // Ensure all required fields are present
+    // Ensure all required fields are present with proper defaults
     return {
       ...mark,
+      signed: mark.signed ?? false,
       assignmentSubmitted: mark.assignmentSubmitted ?? false,
       departmentFine: mark.departmentFine ?? 0
     };
