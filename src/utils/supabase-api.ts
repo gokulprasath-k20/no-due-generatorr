@@ -73,6 +73,25 @@ export const api = {
     return data;
   },
 
+  async getAllStudents(): Promise<Student[]> {
+    try {
+      const { data, error } = await supabase
+        .from('students')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Supabase error in getAllStudents:', error);
+        throw new Error(`Database error: ${error.message}`);
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error in getAllStudents:', error);
+      throw error;
+    }
+  },
+
   async getStudentByRegNo(registerNumber: string): Promise<{ student: Student | null, marks: Mark[] }> {
     try {
       const { data, error } = await supabase

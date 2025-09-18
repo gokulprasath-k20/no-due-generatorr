@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from '@/hooks/use-toast';
 import { api } from '@/utils/supabase-api';
 import { Student, Mark, SUBJECTS_BY_YEAR, getSubjectsForYearSem } from '@/types';
-import { Layout } from './Layout';
 import { Loader2, Search, UserPlus, Save, LogOut } from 'lucide-react';
 import { shouldShowMarksColumns } from '@/utils/subject-config';
 
@@ -21,6 +20,8 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   const [marks, setMarks] = useState<Mark[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [allStudents, setAllStudents] = useState<Student[]>([]);
+  const [loadingStudents, setLoadingStudents] = useState(false);
   
   // New student form
   const [showNewStudent, setShowNewStudent] = useState(false);
@@ -30,6 +31,47 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   const [newStudentSem, setNewStudentSem] = useState<string>('');
   const [newStudentDept, setNewStudentDept] = useState<string>('');
   
+  // Fetch all registered students on component mount
+  useEffect(() => {
+    fetchAllStudents();
+  }, []);
+
+  const fetchAllStudents = async () => {
+    setLoadingStudents(true);
+    try {
+      const students = await api.getAllStudents();
+      setAllStudents(students);
+    } catch (error) {
+      console.error('Error fetching students:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch registered students",
+        variant: "destructive"
+      });
+    } finally {
+      setLoadingStudents(false);
+    }
+  };
+
+  const selectStudent = async (selectedStudent: Student) => {
+    setSearchRegNo(selectedStudent.register_number);
+    setStudent(selectedStudent);
+    setLoading(true);
+    try {
+      const { marks } = await api.getStudentByRegNo(selectedStudent.register_number);
+      setMarks(marks);
+    } catch (error) {
+      console.error('Error fetching student marks:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch student marks",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const DEPARTMENTS = [
     'Computer Science and Engineering',
     'Information Technology',
@@ -354,8 +396,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   };
 
   return (
-    <Layout>
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-800">Admin Panel</h1>
@@ -385,6 +426,69 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Search'}
               </Button>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Registered Students List */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="h-5 w-5" />
+              Registered Students ({allStudents.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingStudents ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin" />
+                <span className="ml-2">Loading students...</span>
+              </div>
+            ) : allStudents.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No registered students found
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-gray-300">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="border border-gray-300 px-4 py-2 text-left font-medium">Name</th>
+                      <th className="border border-gray-300 px-4 py-2 text-left font-medium">Register Number</th>
+                      <th className="border border-gray-300 px-4 py-2 text-left font-medium">Department</th>
+                      <th className="border border-gray-300 px-4 py-2 text-left font-medium">Year/Sem</th>
+                      <th className="border border-gray-300 px-4 py-2 text-center font-medium">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allStudents.map((studentItem) => (
+                      <tr key={studentItem.id} className="hover:bg-gray-50">
+                        <td className="border border-gray-300 px-4 py-2">{studentItem.name}</td>
+                        <td className="border border-gray-300 px-4 py-2 font-mono">{studentItem.register_number}</td>
+                        <td className="border border-gray-300 px-4 py-2">{studentItem.department}</td>
+                        <td className="border border-gray-300 px-4 py-2">
+                          {studentItem.year === 2 ? '2nd' : '3rd'} Year
+                          {studentItem.semester && ` / ${studentItem.semester}th Sem`}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2 text-center">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => selectStudent(studentItem)}
+                            disabled={loading}
+                          >
+                            {loading && student?.id === studentItem.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              'Select'
+                            )}
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -645,7 +749,6 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
             </CardContent>
           </Card>
         )}
-        </div>
-    </Layout>
+    </div>
   );
 }
