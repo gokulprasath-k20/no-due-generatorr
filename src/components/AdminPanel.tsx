@@ -337,9 +337,9 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
     return value === null || value === undefined ? '' : value.toString();
   };
 
-  const getAssignmentStatus = (subject: string): boolean => {
+  const getAssignmentStatus = (subject: string): string => {
     const mark = marks.find(m => m.subject === subject);
-    return mark?.assignmentSubmitted ?? false;
+    return mark?.assignmentSubmitted ? 'submitted' : 'not-submitted';
   };
 
   const getDepartmentFeesStatus = (subject: string): boolean => {
@@ -551,7 +551,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                           <td className="border border-gray-300 px-2 py-2 text-center">
                             {shouldShowMarksColumns(subject) ? (
                               <Select
-                                value={getAssignmentStatus(subject) ? 'submitted' : 'not-submitted'}
+                                value={getAssignmentStatus(subject)}
                                 onValueChange={(value) => {
                                   const isSubmitted = value === 'submitted';
                                   console.log(`Assignment ${subject} submission set to:`, isSubmitted);
@@ -637,7 +637,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                 ) : (
                   <>
                     <Save className="mr-2 h-4 w-4" />
-                    Save Marks
+                    Save All Changes
                   </>
                 )}
               </Button>
