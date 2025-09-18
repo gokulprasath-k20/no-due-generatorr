@@ -334,17 +334,41 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
           backgroundColor: 'white',
           overflowX: 'auto'
         }}>
-          {/* Header */}
+          {/* Header with Official Logo */}
           <div className="text-center mb-8 print:mb-6 print:pt-8 print:px-8">
-            <div className="text-2xl font-bold text-blue-600 mb-2">
-              AVS Engineering College
+            {/* College Logo Header */}
+            <div className="flex items-center justify-center gap-4 mb-6">
+              {/* Left Logo */}
+              <div className="w-16 h-16 flex-shrink-0">
+                <div className="w-full h-full bg-orange-500 rounded-full flex items-center justify-center">
+                  <div className="text-white font-bold text-lg">AVS</div>
+                </div>
+              </div>
+              
+              {/* College Name */}
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-600 tracking-wide">
+                  AVS ENGINEERING COLLEGE
+                </div>
+                <div className="text-sm text-gray-600 mt-1">
+                  Salem, Tamil Nadu
+                </div>
+              </div>
+              
+              {/* Right Logo */}
+              <div className="w-16 h-16 flex-shrink-0">
+                <div className="w-full h-full bg-red-600 rounded-full flex items-center justify-center">
+                  <div className="text-white font-bold text-xs">LOGO</div>
+                </div>
+              </div>
             </div>
-            <div className="text-sm text-gray-600 mb-4">
-              Salem, Tamil Nadu
+            
+            {/* Department Header */}
+            <div className="text-xl font-bold text-black mb-6 border-b-2 border-gray-300 pb-2">
+              Department of Information Technology
             </div>
-            <div className="text-lg font-semibold text-black mb-4">
-              Department Of Information Technology
-            </div>
+            
+            {/* Certificate Title */}
             <h2 className="text-2xl font-bold text-black mb-6 underline">
               NO DUE CERTIFICATE
             </h2>
