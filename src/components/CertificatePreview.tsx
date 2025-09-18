@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Student, Mark, SUBJECTS_BY_YEAR, getSubjectsForYearSem } from '@/types';
 import { Layout } from './Layout';
-import { ArrowLeft, Download, Printer, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Download, Printer, RefreshCw, Loader2 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { getSubjectColumnConfig } from '@/utils/subject-config';
@@ -302,21 +302,28 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
           />
         </div>
 
-        <div className="flex justify-between items-center mb-6">
-          <Button variant="outline" onClick={onBack}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <Button variant="outline" onClick={onBack} className="w-full sm:w-auto">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Search
+            Back
           </Button>
-          <div className="space-x-2">
-            <Button variant="outline" onClick={handleRefresh} disabled={refreshing}>
-              <RefreshCw className={`mr-2 h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
-            <Button variant="outline" onClick={handlePrint}>
+          
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            {onRefresh && (
+              <Button variant="outline" onClick={handleRefresh} disabled={refreshing} className="w-full sm:w-auto">
+                {refreshing ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                )}
+                Refresh
+              </Button>
+            )}
+            <Button variant="outline" onClick={handlePrint} className="w-full sm:w-auto">
               <Printer className="mr-2 h-4 w-4" />
               Print
             </Button>
-            <Button variant="outline" onClick={handleDownloadPDF}>
+            <Button onClick={handleDownloadPDF} className="w-full sm:w-auto">
               <Download className="mr-2 h-4 w-4" />
               Download PDF
             </Button>
@@ -324,7 +331,7 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
         </div>
 
         {/* Certificate */}
-        <Card id="certificate" className="p-4 sm:p-6 md:p-8 print:p-0 print:shadow-none print:border-0" style={{ 
+        <Card id="certificate" className="p-2 sm:p-4 md:p-6 lg:p-8 print:p-0 print:shadow-none print:border-0" style={{ 
           width: '100%',
           maxWidth: '210mm',
           minHeight: '297mm',
@@ -335,28 +342,29 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
           overflowX: 'auto'
         }}>
           {/* Header with Official Logo */}
-          <div className="text-center mb-8 print:mb-6 print:pt-8 print:px-8">
+          <div className="text-center mb-4 sm:mb-6 md:mb-8 print:mb-6 print:pt-8 print:px-8">
             {/* College Logo Header */}
-            <div className="flex items-center justify-center gap-4 mb-6">
+            <div className="flex items-center justify-center gap-2 sm:gap-4 mb-4 sm:mb-6">
               {/* Left Logo */}
-              <div className="w-16 h-16 flex-shrink-0">
+              <div className="w-12 h-12 sm:w-14 md:w-16 sm:h-14 md:h-16 flex-shrink-0">
                 <div className="w-full h-full bg-orange-500 rounded-full flex items-center justify-center">
-                  <div className="text-white font-bold text-lg">AVS</div>
+                  <div className="text-white font-bold text-sm sm:text-base md:text-lg">AVS</div>
                 </div>
               </div>
               
               {/* College Name */}
-              <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600 tracking-wide">
-                  AVS ENGINEERING COLLEGE
+              <div className="text-center flex-1 min-w-0">
+                <div className="text-lg sm:text-2xl md:text-3xl font-bold text-blue-600 tracking-wide leading-tight">
+                  <span className="block sm:inline">AVS ENGINEERING</span>
+                  <span className="block sm:inline sm:ml-2">COLLEGE</span>
                 </div>
-                <div className="text-sm text-gray-600 mt-1">
+                <div className="text-xs sm:text-sm text-gray-600 mt-1">
                   Salem, Tamil Nadu
                 </div>
               </div>
               
               {/* Right Logo */}
-              <div className="w-16 h-16 flex-shrink-0">
+              <div className="w-12 h-12 sm:w-14 md:w-16 sm:h-14 md:h-16 flex-shrink-0">
                 <div className="w-full h-full bg-red-600 rounded-full flex items-center justify-center">
                   <div className="text-white font-bold text-xs">LOGO</div>
                 </div>
@@ -364,63 +372,63 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
             </div>
             
             {/* Department Header */}
-            <div className="text-xl font-bold text-black mb-6 border-b-2 border-gray-300 pb-2">
+            <div className="text-sm sm:text-lg md:text-xl font-bold text-black mb-4 sm:mb-6 border-b-2 border-gray-300 pb-2">
               Department of Information Technology
             </div>
             
             {/* Certificate Title */}
-            <h2 className="text-2xl font-bold text-black mb-6 underline">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-black mb-4 sm:mb-6 underline">
               NO DUE CERTIFICATE
             </h2>
           </div>
 
           {/* Student Details */}
-          <div className="mb-8 print:mb-6 print:px-8">
-            <div className="flex justify-between items-start">
+          <div className="mb-4 sm:mb-6 md:mb-8 print:mb-6 print:px-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-4 sm:gap-0">
               {/* Left side */}
-              <div className="space-y-4">
+              <div className="space-y-2 sm:space-y-4 w-full sm:w-auto">
                 <div>
-                  <p className="text-sm font-medium text-black mb-1">Name:</p>
-                  <p className="text-base text-black">{student.name}</p>
+                  <p className="text-xs sm:text-sm font-medium text-black mb-1">Name:</p>
+                  <p className="text-sm sm:text-base text-black">{student.name}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-black mb-1">Register Number:</p>
-                  <p className="text-base text-black">{student.register_number}</p>
+                  <p className="text-xs sm:text-sm font-medium text-black mb-1">Register Number:</p>
+                  <p className="text-sm sm:text-base text-black font-mono">{student.register_number}</p>
                 </div>
               </div>
               
               {/* Right side */}
-              <div className="space-y-4 text-right">
+              <div className="space-y-2 sm:space-y-4 text-left sm:text-right w-full sm:w-auto">
                 <div>
-                  <p className="text-sm font-medium text-black mb-1">Date:</p>
-                  <p className="text-base text-black">{new Date().toLocaleDateString('en-GB', { 
+                  <p className="text-xs sm:text-sm font-medium text-black mb-1">Date:</p>
+                  <p className="text-sm sm:text-base text-black">{new Date().toLocaleDateString('en-GB', { 
                     day: '2-digit', 
                     month: '2-digit', 
                     year: 'numeric' 
                   })}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-black mb-1">Year/Sem:</p>
-                  <p className="text-base text-black">{student.year === 2 ? '2nd' : '3rd'} / {student.semester ? `${student.semester}th` : ''}</p>
+                  <p className="text-xs sm:text-sm font-medium text-black mb-1">Year/Sem:</p>
+                  <p className="text-sm sm:text-base text-black">{student.year === 2 ? '2nd' : '3rd'} / {student.semester ? `${student.semester}th` : ''}</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Marks Table */}
-          <div className="mb-8 print:mb-6 print:px-8 print:mt-8">
+          <div className="mb-4 sm:mb-6 md:mb-8 print:mb-6 print:px-8 print:mt-8">
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse border border-gray-400">
+              <table className="w-full border-collapse border border-gray-400 text-xs sm:text-sm">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border border-gray-400 px-4 py-3 text-center font-medium text-sm text-black">Subject</th>
-                    <th className="border border-gray-400 px-3 py-3 text-center font-medium text-sm text-black">IAT1</th>
-                    <th className="border border-gray-400 px-3 py-3 text-center font-medium text-sm text-black">IAT2</th>
-                    <th className="border border-gray-400 px-3 py-3 text-center font-medium text-sm text-black">Model</th>
-                    <th className="border border-gray-400 px-3 py-3 text-center font-medium text-sm text-black">Assignment Submission</th>
-                    <th className="border border-gray-400 px-3 py-3 text-center font-medium text-sm text-black">Department Fees</th>
-                    <th className="border border-gray-400 px-3 py-3 text-center font-medium text-sm text-black">Status</th>
-                    <th className="border border-gray-400 px-3 py-3 text-center font-medium text-sm text-black">Signature</th>
+                    <th className="border border-gray-400 px-1 sm:px-2 md:px-4 py-2 sm:py-3 text-center font-medium text-black">Subject</th>
+                    <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black">IAT1</th>
+                    <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black">IAT2</th>
+                    <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black">Model</th>
+                    <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black hidden sm:table-cell">Assignment</th>
+                    <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black hidden sm:table-cell">Fees</th>
+                    <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black hidden md:table-cell">Status</th>
+                    <th className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center font-medium text-black">Signature</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -429,46 +437,46 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
                     const config = getSubjectColumnConfig(subject);
                     return (
                       <tr key={subject} className="bg-white">
-                        <td className="border border-gray-400 px-4 py-3 text-left text-sm text-black">
+                        <td className="border border-gray-400 px-1 sm:px-2 md:px-4 py-2 sm:py-3 text-left text-black">
                           {subject}
                         </td>
-                        <td className="border border-gray-400 px-3 py-3 text-center text-sm text-black">
+                        <td className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center text-black">
                           {config.showMarks ? (
                             mark?.iat1 !== null && mark?.iat1 !== undefined ? mark.iat1 : ''
                           ) : ''}
                         </td>
-                        <td className="border border-gray-400 px-3 py-3 text-center text-sm text-black">
+                        <td className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center text-black">
                           {config.showMarks ? (
                             mark?.iat2 !== null && mark?.iat2 !== undefined ? mark.iat2 : ''
                           ) : ''}
                         </td>
-                        <td className="border border-gray-400 px-3 py-3 text-center text-sm text-black">
+                        <td className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center text-black">
                           {config.showMarks ? (
                             mark?.model !== null && mark?.model !== undefined ? mark.model : ''
                           ) : ''}
                         </td>
-                        <td className="border border-gray-400 px-3 py-3 text-center text-sm text-black">
+                        <td className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center text-black hidden sm:table-cell">
                           {config.showAssignment ? (
                             mark?.assignmentSubmitted ? 'Submitted' : (
                               <span className="text-red-500 font-bold">X</span>
                             )
                           ) : ''}
                         </td>
-                        <td className="border border-gray-400 px-3 py-3 text-center text-sm text-black">
+                        <td className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center text-black hidden sm:table-cell">
                           {config.showDepartmentFees ? (
                             mark?.departmentFine === 0 ? 'Paid' : (
                               <span className="text-red-500 font-bold">X</span>
                             )
                           ) : ''}
                         </td>
-                        <td className="border border-gray-400 px-3 py-3 text-center text-sm text-black">
+                        <td className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center text-black hidden md:table-cell">
                           {config.showDueStatus ? (
                             getDueStatusForSubject(subject, mark) === 'Completed' ? 'Completed' : (
                               <span className="text-red-500 font-bold">X</span>
                             )
                           ) : ''}
                         </td>
-                        <td className="border border-gray-400 px-3 py-3 text-center text-sm text-black">
+                        <td className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center text-black">
                           {mark?.signed ? '' : (
                             <span className="text-red-500 font-bold">X</span>
                           )}

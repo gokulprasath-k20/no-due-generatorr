@@ -2,8 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>no-due-generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>No Due Certificate System</title>
     <meta name="description" content="No Due Certificate Management System" />
     <meta name="author" content="AVS Engineering College" />
 
@@ -13,6 +13,26 @@
 
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@avscollege" />
+    
+    <style>
+      /* Mobile-specific styles */
+      * {
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      body {
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+        touch-action: manipulation;
+      }
+      
+      /* Prevent zoom on input focus */
+      @media screen and (max-width: 768px) {
+        input, select, textarea {
+          font-size: 16px !important;
+        }
+      }
+    </style>
   </head>
 
   <body>

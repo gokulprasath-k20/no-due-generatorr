@@ -11,7 +11,7 @@ export function Layout({ children, className = '', showHeader = true }: LayoutPr
   return (
     <div className="min-h-screen bg-gray-50">
       {showHeader && <CollegeHeader />}
-      <main className={`max-w-6xl mx-auto px-4 py-8 ${className}`}>
+      <main className={`max-w-6xl mx-auto px-2 sm:px-4 py-4 sm:py-6 md:py-8 ${className}`}>
         {children}
       </main>
     </div>

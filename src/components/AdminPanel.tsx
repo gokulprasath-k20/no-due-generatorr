@@ -396,11 +396,11 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 px-2 sm:px-4">
         {/* Header */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-800">Admin Panel</h1>
-          <Button variant="outline" onClick={onLogout}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Admin Panel</h1>
+          <Button variant="outline" onClick={onLogout} className="w-full sm:w-auto">
             <LogOut className="mr-2 h-4 w-4" />
             Logout
           </Button>
@@ -415,21 +415,22 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 placeholder="Enter register number"
                 value={searchRegNo}
                 onChange={(e) => setSearchRegNo(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && searchStudent()}
+                className="flex-1"
               />
-              <Button onClick={searchStudent} disabled={loading}>
+              <Button onClick={searchStudent} disabled={loading} className="w-full sm:w-auto">
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Search'}
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Registered Students List */}
+        {/* Registered Students List - Semester Wise */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -448,45 +449,115 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                 No registered students found
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-gray-300">
-                  <thead>
-                    <tr className="bg-gray-50">
-                      <th className="border border-gray-300 px-4 py-2 text-left font-medium">Name</th>
-                      <th className="border border-gray-300 px-4 py-2 text-left font-medium">Register Number</th>
-                      <th className="border border-gray-300 px-4 py-2 text-left font-medium">Department</th>
-                      <th className="border border-gray-300 px-4 py-2 text-left font-medium">Year/Sem</th>
-                      <th className="border border-gray-300 px-4 py-2 text-center font-medium">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {allStudents.map((studentItem) => (
-                      <tr key={studentItem.id} className="hover:bg-gray-50">
-                        <td className="border border-gray-300 px-4 py-2">{studentItem.name}</td>
-                        <td className="border border-gray-300 px-4 py-2 font-mono">{studentItem.register_number}</td>
-                        <td className="border border-gray-300 px-4 py-2">{studentItem.department}</td>
-                        <td className="border border-gray-300 px-4 py-2">
-                          {studentItem.year === 2 ? '2nd' : '3rd'} Year
-                          {studentItem.semester && ` / ${studentItem.semester}th Sem`}
-                        </td>
-                        <td className="border border-gray-300 px-4 py-2 text-center">
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => selectStudent(studentItem)}
-                            disabled={loading}
-                          >
-                            {loading && student?.id === studentItem.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              'Select'
-                            )}
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="space-y-6">
+                {/* Group students by semester and sort alphabetically */}
+                {(() => {
+                  // Group students by semester
+                  const studentsBySemester = allStudents.reduce((acc, student) => {
+                    const semesterKey = student.semester ? `${student.semester}th Semester` : 'No Semester';
+                    if (!acc[semesterKey]) {
+                      acc[semesterKey] = [];
+                    }
+                    acc[semesterKey].push(student);
+                    return acc;
+                  }, {} as Record<string, typeof allStudents>);
+
+                  // Sort each semester group alphabetically by name
+                  Object.keys(studentsBySemester).forEach(semester => {
+                    studentsBySemester[semester].sort((a, b) => a.name.localeCompare(b.name));
+                  });
+
+                  // Sort semesters in order (3rd, 4th, 5th, 6th, 7th, 8th, No Semester)
+                  const semesterOrder = ['3rd Semester', '4th Semester', '5th Semester', '6th Semester', '7th Semester', '8th Semester', 'No Semester'];
+                  const sortedSemesters = semesterOrder.filter(sem => studentsBySemester[sem]);
+
+                  return sortedSemesters.map(semester => (
+                    <div key={semester} className="border border-gray-200 rounded-lg">
+                      {/* Semester Header */}
+                      <div className="bg-blue-50 px-4 py-3 border-b border-gray-200">
+                        <h3 className="text-lg font-semibold text-blue-800">
+                          {semester} ({studentsBySemester[semester].length} students)
+                        </h3>
+                      </div>
+                      
+                      {/* Students Table for this semester - Mobile Responsive */}
+                      <div className="block sm:hidden">
+                        {/* Mobile Card Layout */}
+                        <div className="space-y-3">
+                          {studentsBySemester[semester].map((studentItem) => (
+                            <div key={studentItem.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                              <div className="flex justify-between items-start mb-2">
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-gray-900">{studentItem.name}</h4>
+                                  <p className="text-sm text-gray-600 font-mono">{studentItem.register_number}</p>
+                                </div>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => selectStudent(studentItem)}
+                                  disabled={loading}
+                                  className="text-xs ml-2"
+                                >
+                                  {loading && student?.id === studentItem.id ? (
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                  ) : (
+                                    'Select'
+                                  )}
+                                </Button>
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                <p>{studentItem.department}</p>
+                                <p>{studentItem.year === 2 ? '2nd' : '3rd'} Year</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Desktop Table Layout */}
+                      <div className="hidden sm:block overflow-x-auto">
+                        <table className="w-full border-collapse">
+                          <thead>
+                            <tr className="bg-gray-50">
+                              <th className="border-b border-gray-200 px-2 sm:px-4 py-2 text-left font-medium text-sm">Name</th>
+                              <th className="border-b border-gray-200 px-2 sm:px-4 py-2 text-left font-medium text-sm">Register Number</th>
+                              <th className="border-b border-gray-200 px-2 sm:px-4 py-2 text-left font-medium text-sm hidden md:table-cell">Department</th>
+                              <th className="border-b border-gray-200 px-2 sm:px-4 py-2 text-left font-medium text-sm">Year</th>
+                              <th className="border-b border-gray-200 px-2 sm:px-4 py-2 text-center font-medium text-sm">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {studentsBySemester[semester].map((studentItem, index) => (
+                              <tr key={studentItem.id} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
+                                <td className="border-b border-gray-100 px-2 sm:px-4 py-2 font-medium text-sm">{studentItem.name}</td>
+                                <td className="border-b border-gray-100 px-2 sm:px-4 py-2 font-mono text-xs sm:text-sm">{studentItem.register_number}</td>
+                                <td className="border-b border-gray-100 px-2 sm:px-4 py-2 text-xs sm:text-sm hidden md:table-cell">{studentItem.department}</td>
+                                <td className="border-b border-gray-100 px-2 sm:px-4 py-2 text-xs sm:text-sm">
+                                  {studentItem.year === 2 ? '2nd' : '3rd'} Year
+                                </td>
+                                <td className="border-b border-gray-100 px-2 sm:px-4 py-2 text-center">
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => selectStudent(studentItem)}
+                                    disabled={loading}
+                                    className="text-xs"
+                                  >
+                                    {loading && student?.id === studentItem.id ? (
+                                      <Loader2 className="h-3 w-3 animate-spin" />
+                                    ) : (
+                                      'Select'
+                                    )}
+                                  </Button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  ));
+                })()}
               </div>
             )}
           </CardContent>
