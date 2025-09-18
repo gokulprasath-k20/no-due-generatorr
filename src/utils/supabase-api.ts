@@ -246,22 +246,46 @@ export const api = {
           iat2: mark.iat2 ?? null,
           model: mark.model ?? null,
           signed: mark.signed ?? false,
-          department_fine: mark.departmentFine ?? 0
+          assignmentSubmitted: mark.assignmentSubmitted ?? false,
+          departmentFine: mark.departmentFine ?? 0
         };
 
-        // Add assignmentSubmitted with the correct case sensitivity
-        markData['assignmentSubmitted'] = mark.assignmentSubmitted ?? false;
+        console.log(`[DEBUG] Updating marks for ${mark.subject}:`, markData);
 
-        // Try direct update first
-        const { error } = await supabase
+        // Try with all fields first
+        let { error } = await supabase
           .from('marks')
           .upsert(markData, {
             onConflict: 'student_id,subject'
           });
 
+        // If there's a column error, try progressive fallback
+        if (error && (error.message.includes('column') || error.message.includes('does not exist'))) {
+          console.warn('Column error, trying fallback approach:', error.message);
+          
+          // Try without assignmentSubmitted if it doesn't exist
+          const fallbackData = {
+            student_id: studentId,
+            subject: mark.subject,
+            iat1: mark.iat1 ?? null,
+            iat2: mark.iat2 ?? null,
+            model: mark.model ?? null,
+            signed: mark.signed ?? false,
+            department_fine: mark.departmentFine ?? 0
+          };
+          
+          const fallbackResult = await supabase
+            .from('marks')
+            .upsert(fallbackData, {
+              onConflict: 'student_id,subject'
+            });
+          
+          error = fallbackResult.error;
+        }
+
         if (error) {
           console.error('Error updating marks:', error);
-          throw new Error(`Failed to update marks: ${error.message}`);
+          throw new Error(`Failed to update marks for ${mark.subject}: ${error.message}`);
         }
       }
     } catch (error) {

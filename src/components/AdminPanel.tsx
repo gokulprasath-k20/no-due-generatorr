@@ -279,7 +279,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
           iat2: mark.iat2,
           model: mark.model,
           signed: mark.signed,
-          department_fine: mark.departmentFine ?? 0,
+          departmentFine: mark.departmentFine ?? 0,
           assignmentSubmitted: mark.assignmentSubmitted ?? false
         };
         

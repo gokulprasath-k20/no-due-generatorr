@@ -125,24 +125,29 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
         #certificate table {
           width: 100% !important;
           border-collapse: collapse;
-          font-size: 13px;
+          font-size: 12px;
           page-break-inside: avoid;
-          border: 2px solid #1e40af;
+          border: 2px solid #000000;
         }
         #certificate th, #certificate td {
-          padding: 8px 12px;
-          border: 1px solid #94a3b8;
+          padding: 8px 6px;
+          border: 2px solid #000000;
+          text-align: center;
         }
         #certificate th {
-          background-color: #dbeafe;
-          color: #1e40af;
-          font-weight: 600;
+          background-color: #ffffff;
+          color: #000000;
+          font-weight: bold;
+          font-size: 11px;
         }
-        #certificate tr:nth-child(even) {
-          background-color: #f8fafc;
+        #certificate td {
+          background-color: #ffffff;
+          color: #000000;
+          font-size: 11px;
+          height: 40px;
         }
-        #certificate tr:hover {
-          background-color: #f1f5f9;
+        #certificate tr {
+          background-color: #ffffff;
         }
         .no-print, .no-print * {
           display: none !important;
@@ -335,29 +340,17 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
 
           {/* Marks Table */}
           <div className="mb-6 print:mb-4 print:px-8 print:mt-8 overflow-x-auto">
-            <table className="w-full border-collapse border-2 border-gray-300 print:text-sm min-w-[900px] sm:min-w-0">
+            <table className="w-full border-collapse border-2 border-black print:text-sm">
               <thead>
-                <tr className="bg-blue-50">
-                  <th className="border-2 border-gray-300 px-2 py-3 text-left font-bold text-xs sm:text-sm md:text-base print:px-3 print:py-2">Subject</th>
-                  {hasAnyMarksColumns && (
-                    <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">IAT1</th>
-                  )}
-                  {hasAnyMarksColumns && (
-                    <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">IAT2</th>
-                  )}
-                  {hasAnyMarksColumns && (
-                    <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">Model</th>
-                  )}
-                  {hasAnyAssignmentColumns && (
-                    <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">Assignment Submission</th>
-                  )}
-                  {hasAnyDepartmentFeesColumns && (
-                    <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">Departmental Fees (₹)</th>
-                  )}
-                  {hasAnyDueStatusColumns && (
-                    <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">Due Status</th>
-                  )}
-                  <th className="border-2 border-gray-300 px-1 py-3 text-center font-bold text-xs sm:text-sm md:text-base print:px-2 print:py-2">Signature</th>
+                <tr className="bg-white">
+                  <th className="border-2 border-black px-3 py-3 text-center font-bold text-sm print:px-3 print:py-2">Subject</th>
+                  <th className="border-2 border-black px-2 py-3 text-center font-bold text-sm print:px-2 print:py-2">IAT1</th>
+                  <th className="border-2 border-black px-2 py-3 text-center font-bold text-sm print:px-2 print:py-2">IAT2</th>
+                  <th className="border-2 border-black px-2 py-3 text-center font-bold text-sm print:px-2 print:py-2">MODEL</th>
+                  <th className="border-2 border-black px-2 py-3 text-center font-bold text-sm print:px-2 print:py-2">ASSIGNMENT SUBMISSION</th>
+                  <th className="border-2 border-black px-2 py-3 text-center font-bold text-sm print:px-2 print:py-2">DEPARTMENTAL FEES</th>
+                  <th className="border-2 border-black px-2 py-3 text-center font-bold text-sm print:px-2 print:py-2">DUE STATUS</th>
+                  <th className="border-2 border-black px-2 py-3 text-center font-bold text-sm print:px-2 print:py-2">SIGNATURE</th>
                 </tr>
               </thead>
               <tbody>
@@ -365,66 +358,34 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
                   const mark = getMarkForSubject(subject);
                   const config = getSubjectColumnConfig(subject);
                   return (
-                    <tr key={subject} className="hover:bg-gray-50">
-                      <td className="border-2 border-gray-300 px-2 py-2 text-xs sm:text-sm print:px-2 print:py-2">{subject}</td>
-                      {hasAnyMarksColumns && (
-                        <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
-                          {config.showMarks ? (mark?.iat1 !== undefined ? mark.iat1 : '-') : '-'}
-                        </td>
-                      )}
-                      {hasAnyMarksColumns && (
-                        <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
-                          {config.showMarks ? (mark?.iat2 !== undefined ? mark.iat2 : '-') : '-'}
-                        </td>
-                      )}
-                      {hasAnyMarksColumns && (
-                        <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
-                          {config.showMarks ? (mark?.model !== undefined ? mark.model : '-') : '-'}
-                        </td>
-                      )}
-                      {hasAnyAssignmentColumns && (
-                        <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
-                          {config.showAssignment ? (
-                            mark?.assignmentSubmitted ? (
-                              <span className="inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-green-100 text-green-700">
-                                ✓
-                              </span>
-                            ) : (
-                              <span className="text-gray-400 text-sm">Not Submitted</span>
-                            )
-                          ) : (
-                            <span className="text-gray-400">-</span>
-                          )}
-                        </td>
-                      )}
-                      {hasAnyDepartmentFeesColumns && (
-                        <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
-                          {config.showDepartmentFees ? (mark?.departmentFine > 0 ? `₹${mark.departmentFine}` : '₹0') : '-'}
-                        </td>
-                      )}
-                      {hasAnyDueStatusColumns && (
-                        <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
-                          {config.showDueStatus ? (
-                            <span className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium ${
-                              getDueStatusForSubject(subject, mark) === 'Completed'
-                                ? 'bg-green-100 text-green-700' 
-                                : 'bg-yellow-100 text-yellow-700'
-                            }`}>
-                              {getDueStatusForSubject(subject, mark)}
-                            </span>
-                          ) : (
-                            <span className="text-gray-400">-</span>
-                          )}
-                        </td>
-                      )}
-                      <td className="border-2 border-gray-300 px-1 py-2 text-center text-xs sm:text-sm print:px-1 print:py-2">
-                        {mark?.signed ? (
-                          <span className="inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-green-100 text-green-700">
-                            ✓
-                          </span>
-                        ) : (
-                          <span className="text-gray-400 text-sm">Pending</span>
-                        )}
+                    <tr key={subject} className="bg-white">
+                      <td className="border-2 border-black px-3 py-4 text-center text-sm print:px-3 print:py-3">{subject}</td>
+                      <td className="border-2 border-black px-2 py-4 text-center text-sm print:px-2 print:py-3">
+                        {config.showMarks ? (mark?.iat1 !== null && mark?.iat1 !== undefined ? mark.iat1 : '') : ''}
+                      </td>
+                      <td className="border-2 border-black px-2 py-4 text-center text-sm print:px-2 print:py-3">
+                        {config.showMarks ? (mark?.iat2 !== null && mark?.iat2 !== undefined ? mark.iat2 : '') : ''}
+                      </td>
+                      <td className="border-2 border-black px-2 py-4 text-center text-sm print:px-2 print:py-3">
+                        {config.showMarks ? (mark?.model !== null && mark?.model !== undefined ? mark.model : '') : ''}
+                      </td>
+                      <td className="border-2 border-black px-2 py-4 text-center text-sm print:px-2 print:py-3">
+                        {config.showAssignment ? (
+                          mark?.assignmentSubmitted ? 'Submitted' : ''
+                        ) : ''}
+                      </td>
+                      <td className="border-2 border-black px-2 py-4 text-center text-sm print:px-2 print:py-3">
+                        {config.showDepartmentFees ? (
+                          mark?.departmentFine === 0 ? 'Paid' : 'Not Paid'
+                        ) : ''}
+                      </td>
+                      <td className="border-2 border-black px-2 py-4 text-center text-sm print:px-2 print:py-3">
+                        {config.showDueStatus ? (
+                          getDueStatusForSubject(subject, mark)
+                        ) : ''}
+                      </td>
+                      <td className="border-2 border-black px-2 py-4 text-center text-sm print:px-2 print:py-3">
+                        {mark?.signed ? '✓' : ''}
                       </td>
                     </tr>
                   );
