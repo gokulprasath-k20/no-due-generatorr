@@ -527,11 +527,12 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   };
 
   // Helper function to format ordinal numbers
-  const getOrdinalSuffix = (num: string): string => {
-    if (num === '1') return '1st';
-    if (num === '2') return '2nd';
-    if (num === '3') return '3rd';
-    return `${num}th`;
+  const getOrdinalSuffix = (num: string | number): string => {
+    const numStr = num.toString();
+    if (numStr === '1') return '1st';
+    if (numStr === '2') return '2nd';
+    if (numStr === '3') return '3rd';
+    return `${numStr}th`;
   };
 
   return (
@@ -661,7 +662,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                       }
                     }
                     
-                    const semesterKey = semesterValue ? `${semesterValue}th Semester` : 'No Semester';
+                    const semesterKey = semesterValue ? `${getOrdinalSuffix(semesterValue.toString())} Semester` : 'No Semester';
                     console.log('AdminPanel: Grouping student:', student.name, 'with semester key:', semesterKey, 'original semester:', student.semester, 'parsed:', semesterValue);
                     
                     if (!acc[semesterKey]) {
