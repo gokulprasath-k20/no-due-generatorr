@@ -30,7 +30,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   const [newStudentRegNo, setNewStudentRegNo] = useState('');
   const [newStudentYear, setNewStudentYear] = useState<string>('');
   const [newStudentSem, setNewStudentSem] = useState<string>('');
-  const [newStudentDept, setNewStudentDept] = useState<string>('');
+  const [newStudentDept, setNewStudentDept] = useState<string>('Information Technology');
   
   // Fetch all registered students on component mount
   useEffect(() => {
@@ -126,8 +126,8 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
   };
 
   const DEPARTMENTS = [
-    'Computer Science and Engineering',
     'Information Technology',
+    'Computer Science and Engineering',
     'Electronics and Communication Engineering',
     'Electrical and Electronics Engineering',
     'Mechanical Engineering',
@@ -223,7 +223,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
       setNewStudentRegNo('');
       setNewStudentYear('');
       setNewStudentSem('');
-      setNewStudentDept('');
+      setNewStudentDept('Information Technology');
       setShowNewStudent(false);
       
       // Refresh student list or search

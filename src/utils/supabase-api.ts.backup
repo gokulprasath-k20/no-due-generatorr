@@ -4,27 +4,12 @@ import { Student, Mark, SUBJECTS_BY_YEAR, getSubjectsForYearSem } from '@/types'
 export const api = {
   // Student functions
   async registerStudent(name: string, registerNumber: string, year: number, department: string, semester?: number): Promise<Student> {
-    console.log('API: Registration attempt #', Date.now(), 'for:', { name, registerNumber, year, department, semester });
+    console.log('API: Starting registerStudent function...');
+    console.log('API: Registration parameters:', { name, registerNumber, year, department, semester });
     
-    // Validate input parameters
-    if (!name || !name.trim()) {
-      throw new Error('Student name is required');
-    }
-    if (!registerNumber || !registerNumber.trim()) {
-      throw new Error('Register number is required');
-    }
-    if (!department || !department.trim()) {
-      throw new Error('Department is required');
-    }
-    if (!year || year < 1 || year > 4) {
-      throw new Error('Invalid year. Year must be between 1 and 4');
-    }
-    if (semester && (semester < 1 || semester > 8)) {
-      throw new Error('Invalid semester. Semester must be between 1 and 8');
-    }
-
     try {
       // Check if student already exists
+      console.log('API: Checking for existing student with register number:', registerNumber);
       const { data: existingStudent, error: checkError } = await supabase
         .from('students')
         .select('*')
@@ -33,68 +18,108 @@ export const api = {
 
       if (checkError) {
         console.error('API: Error checking existing student:', checkError);
-        throw new Error(`Database error while checking existing student: ${checkError.message}`);
+        throw new Error(`Failed to check existing student: ${checkError.message}`);
       }
 
       if (existingStudent) {
+        console.log('API: Student already exists:', existingStudent);
         throw new Error('Student with this register number already exists');
       }
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('already exists')) {
-        throw error;
-      }
-      console.error('API: Error during student existence check:', error);
-      throw new Error('Failed to verify student registration. Please try again.');
-    }
 
-    // Try with semester field first
-    let { data, error } = await supabase
-      .from('students')
-      .insert([{ 
-        name: name.trim(), 
-        register_number: registerNumber.trim(), 
-        year,
-        department: department.trim(),
-        semester
-      }])
-      .select()
-      .single();
+      console.log('API: No existing student found, proceeding with registration...');
 
-    // If semester column doesn't exist, try without it
-    if (error && (error.message.includes('column') || error.message.includes('does not exist'))) {
-      console.warn('Semester column not available, creating student without semester:', error.message);
-      const result = await supabase
+      // Try with semester field first
+      console.log('API: Attempting to insert student with semester field...');
+      let { data, error } = await supabase
         .from('students')
         .insert([{ 
-          name: name.trim(), 
-          register_number: registerNumber.trim(), 
+          name, 
+          register_number: registerNumber, 
           year,
-          department: department.trim()
+          department,
+          semester
         }])
         .select()
         .single();
-      
-      data = result.data;
-      error = result.error;
-    }
 
-    if (error) {
-      console.error('API: Registration failed with error:', error);
-      console.error('API: Error details:', { message: error.message, code: error.code, details: error.details, hint: error.hint });
-      
-      // Provide more user-friendly error messages
-      if (error.code === '23505') {
-        throw new Error('A student with this register number already exists');
-      } else if (error.code === '23502') {
-        throw new Error('Missing required information. Please fill all fields');
-      } else if (error.code === '23514') {
-        throw new Error('Invalid data provided. Please check your input');
-      } else if (error.message.includes('network') || error.message.includes('fetch')) {
-        throw new Error('Network connection error. Please check your internet and try again');
-      } else {
-        throw new Error(`Registration failed: ${error.message}`);
+      console.log('API: Insert result:', { data, error });
+
+      // If semester column doesn't exist, try without it
+      if (error && (error.message.includes('column') || error.message.includes('does not exist'))) {
+        console.warn('API: Semester column not available, creating student without semester:', error.message);
+        const result = await supabase
+          .from('students')
+          .insert([{ 
+            name, 
+            register_number: registerNumber, 
+            year,
+            department
+          }])
+          .select()
+          .single();
+        
+        console.log('API: Fallback insert result:', result);
+        data = result.data;
+        error = result.error;
       }
+
+      if (error) {
+        console.error('API: Student insertion failed:', error);
+        console.error('API: Error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
+        throw new Error(`Failed to register student: ${error.message}`);
+      }
+
+      console.log('API: Student successfully created:', data);
+
+      // Create empty marks for all subjects based on year and semester
+      console.log('API: Creating marks for subjects...');
+      const subjects = getSubjectsForYearSem(year, semester);
+      console.log('API: Subjects to create marks for:', subjects);
+      
+      const marksToInsert = subjects.map(subject => ({
+        student_id: data.id,
+        subject,
+        iat1: null,
+        iat2: null,
+        model: null,
+        signed: false,
+        assignmentSubmitted: false,
+        departmentFine: 0
+      }));
+
+      console.log('API: Inserting marks:', marksToInsert);
+      const { error: marksError } = await supabase
+        .from('marks')
+        .insert(marksToInsert);
+
+      if (marksError) {
+        console.error('API: Error creating marks:', marksError);
+        console.error('API: Marks error details:', {
+          message: marksError.message,
+          code: marksError.code,
+          details: marksError.details,
+          hint: marksError.hint
+        });
+        // Don't throw error for marks creation failure in registration
+        console.warn('API: Continuing despite marks creation error');
+      } else {
+        console.log('API: Marks created successfully');
+      }
+
+      console.log('API: Registration completed successfully');
+      return data;
+    } catch (error) {
+      console.error('API: Registration failed with error:', error);
+      console.error('API: Error type:', typeof error);
+      console.error('API: Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+      throw error;
     }
+  },
 
     // Create empty marks for all subjects based on year and semester
     const subjects = getSubjectsForYearSem(year, semester);
@@ -114,8 +139,7 @@ export const api = {
       .insert(marksToInsert);
 
     if (marksError) {
-      console.error('API: Error creating marks:', marksError);
-      console.error('API: Marks error details:', { message: marksError.message, code: marksError.code, details: marksError.details, hint: marksError.hint });
+      console.error('Error creating marks:', marksError);
       // Don't throw error for marks creation failure in registration
     }
 

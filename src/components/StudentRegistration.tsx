@@ -14,8 +14,8 @@ interface StudentRegistrationProps {
 }
 
 const DEPARTMENTS = [
-  'Computer Science and Engineering',
   'Information Technology',
+  'Computer Science and Engineering',
   'Electronics and Communication Engineering',
   'Electrical and Electronics Engineering',
   'Mechanical Engineering',
@@ -26,14 +26,64 @@ export function StudentRegistration({ onBack, onRegistrationSuccess }: StudentRe
   const [name, setName] = useState('');
   const [registerNumber, setRegisterNumber] = useState('');
   const [semester, setSemester] = useState<string>('');
-  const [department, setDepartment] = useState<string>('');
+  const [department, setDepartment] = useState<string>('Information Technology');
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!name.trim() || !registerNumber.trim() || !semester || !department) {
+    // Enhanced validation
+    if (!name.trim()) {
       toast({
         title: "Error",
-        description: "Please fill in all fields",
+        description: "Please enter your full name",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!registerNumber.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter your register number",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!semester) {
+      toast({
+        title: "Error",
+        description: "Please select your semester",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!department) {
+      toast({
+        title: "Error",
+        description: "Please select your department",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate register number format (basic check)
+    const regNoPattern = /^[A-Za-z0-9]+$/;
+    if (!regNoPattern.test(registerNumber.trim())) {
+      toast({
+        title: "Error",
+        description: "Register number should contain only letters and numbers",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate name (should contain only letters and spaces)
+    const namePattern = /^[A-Za-z\s]+$/;
+    if (!namePattern.test(name.trim())) {
+      toast({
+        title: "Error",
+        description: "Name should contain only letters and spaces",
         variant: "destructive"
       });
       return;
@@ -44,8 +94,27 @@ export function StudentRegistration({ onBack, onRegistrationSuccess }: StudentRe
       console.log('StudentRegistration: Starting registration process...');
       const semesterNum = parseInt(semester);
       const year = getYearFromSemester(semesterNum);
-      console.log('StudentRegistration: Calling API with:', { name: name.trim(), registerNumber: registerNumber.trim(), year, department, semesterNum });
-      await api.registerStudent(name.trim(), registerNumber.trim(), year, department, semesterNum);
+      
+      // Validate semester and year combination
+      if (semesterNum < 3 || semesterNum > 8) {
+        throw new Error('Invalid semester selected. Please select a semester between 3rd and 8th.');
+      }
+
+      console.log('StudentRegistration: Calling API with:', { 
+        name: name.trim(), 
+        registerNumber: registerNumber.trim().toUpperCase(), 
+        year, 
+        department, 
+        semesterNum 
+      });
+      
+      await api.registerStudent(
+        name.trim(), 
+        registerNumber.trim().toUpperCase(), 
+        year, 
+        department, 
+        semesterNum
+      );
       
       toast({
         title: "Registration Successful",
@@ -53,15 +122,29 @@ export function StudentRegistration({ onBack, onRegistrationSuccess }: StudentRe
       });
       
       // Automatically log them in after successful registration
-      onRegistrationSuccess(registerNumber.trim());
+      onRegistrationSuccess(registerNumber.trim().toUpperCase());
     } catch (error) {
       console.error('StudentRegistration: Registration failed:', error);
       console.error('StudentRegistration: Error type:', typeof error);
       console.error('StudentRegistration: Error details:', error instanceof Error ? { message: error.message, stack: error.stack } : error);
       
+      let errorMessage = "An error occurred during registration";
+      
+      if (error instanceof Error) {
+        if (error.message.includes('already exists')) {
+          errorMessage = "A student with this register number is already registered. Please use a different register number or contact admin.";
+        } else if (error.message.includes('violates')) {
+          errorMessage = "Invalid data provided. Please check your information and try again.";
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorMessage = "Network error. Please check your internet connection and try again.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: "Registration Failed",
-        description: error instanceof Error ? error.message : "An error occurred during registration",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
