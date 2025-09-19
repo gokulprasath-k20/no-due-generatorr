@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from '@/hooks/use-toast';
 import { api } from '@/utils/supabase-api';
 import { Student, Mark, getSubjectsForYearSem } from '@/types';
-import { Loader2, Save, Download, RefreshCw } from 'lucide-react';
+import { Loader2, Save, Download, RefreshCw, Filter } from 'lucide-react';
 import { shouldShowMarksColumns } from '@/utils/subject-config';
 
 interface StudentSheetProps {
@@ -22,10 +22,12 @@ interface StudentWithMarks extends Student {
 
 export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetProps) {
   const [selectedSemester, setSelectedSemester] = useState<string>('3');
+  const [selectedSubject, setSelectedSubject] = useState<string>('all');
   const [studentsWithMarks, setStudentsWithMarks] = useState<StudentWithMarks[]>([]);
   const [loadingMarks, setLoadingMarks] = useState(false);
   const [saving, setSaving] = useState(false);
   const [subjects, setSubjects] = useState<string[]>([]);
+  const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
   // Get filtered students for selected semester
   const getFilteredStudents = (): Student[] => {
@@ -433,6 +435,31 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
     return `${numStr}th`;
   };
 
+  // Handle Enter key navigation
+  const handleKeyDown = (e: React.KeyboardEvent, currentKey: string) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      
+      // Find all input keys and sort them to determine next input
+      const allKeys = Object.keys(inputRefs.current).sort();
+      const currentIndex = allKeys.indexOf(currentKey);
+      
+      if (currentIndex < allKeys.length - 1) {
+        const nextKey = allKeys[currentIndex + 1];
+        const nextInput = inputRefs.current[nextKey];
+        if (nextInput) {
+          nextInput.focus();
+          nextInput.select();
+        }
+      }
+    }
+  };
+
+  // Generate input key for ref management
+  const getInputKey = (studentId: string, field: string): string => {
+    return `${studentId}-${field}`;
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -457,6 +484,25 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
                   <SelectItem value="6">6th Semester</SelectItem>
                   <SelectItem value="7">7th Semester</SelectItem>
                   <SelectItem value="8">8th Semester</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Label className="text-sm font-medium">Subject:</Label>
+              <Select
+                value={selectedSubject}
+                onValueChange={setSelectedSubject}
+              >
+                <SelectTrigger className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Subjects</SelectItem>
+                  {subjects.map((subject) => (
+                    <SelectItem key={subject} value={subject}>
+                      {subject}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -547,11 +593,16 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
                       {/* IAT1 - Average of all academic subjects */}
                       <td className="border border-gray-300 px-4 py-3 text-center">
                         <Input
+                          ref={(el) => {
+                            const key = getInputKey(student.id, 'iat1');
+                            inputRefs.current[key] = el;
+                          }}
                           type="number"
                           min="0"
                           max="100"
                           value={getAverageMarkValue(student.id, 'iat1')}
                           onChange={(e) => updateAllSubjectMarks(student.id, 'iat1', e.target.value)}
+                          onKeyDown={(e) => handleKeyDown(e, getInputKey(student.id, 'iat1'))}
                           className="w-16 h-8 text-center text-sm"
                           placeholder="0"
                         />
@@ -560,11 +611,16 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
                       {/* IAT2 - Average of all academic subjects */}
                       <td className="border border-gray-300 px-4 py-3 text-center">
                         <Input
+                          ref={(el) => {
+                            const key = getInputKey(student.id, 'iat2');
+                            inputRefs.current[key] = el;
+                          }}
                           type="number"
                           min="0"
                           max="100"
                           value={getAverageMarkValue(student.id, 'iat2')}
                           onChange={(e) => updateAllSubjectMarks(student.id, 'iat2', e.target.value)}
+                          onKeyDown={(e) => handleKeyDown(e, getInputKey(student.id, 'iat2'))}
                           className="w-16 h-8 text-center text-sm"
                           placeholder="0"
                         />
@@ -573,11 +629,16 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
                       {/* MODEL - Average of all academic subjects */}
                       <td className="border border-gray-300 px-4 py-3 text-center">
                         <Input
+                          ref={(el) => {
+                            const key = getInputKey(student.id, 'model');
+                            inputRefs.current[key] = el;
+                          }}
                           type="number"
                           min="0"
                           max="100"
                           value={getAverageMarkValue(student.id, 'model')}
                           onChange={(e) => updateAllSubjectMarks(student.id, 'model', e.target.value)}
+                          onKeyDown={(e) => handleKeyDown(e, getInputKey(student.id, 'model'))}
                           className="w-16 h-8 text-center text-sm"
                           placeholder="0"
                         />
