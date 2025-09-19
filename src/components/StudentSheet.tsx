@@ -384,20 +384,51 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
 
       for (const student of studentsWithMarks) {
         try {
-          const marksToSave = student.marks.map(mark => ({
-            subject: mark.subject,
-            iat1: mark.iat1,
-            iat2: mark.iat2,
-            model: mark.model,
-            signed: mark.signed,
-            departmentFine: mark.departmentFine ?? 0,
-            assignmentSubmitted: mark.assignmentSubmitted ?? false
-          }));
+          console.log(`[DEBUG] Saving marks for student: ${student.name} (${student.id})`);
+          
+          // Ensure we have marks for all subjects in the semester
+          const allSubjectsForSemester = subjects;
+          const marksToSave = [];
+          
+          for (const subject of allSubjectsForSemester) {
+            // Find existing mark or create a new one
+            let existingMark = student.marks.find(m => m.subject === subject);
+            
+            if (!existingMark) {
+              // Create a default mark entry for this subject
+              existingMark = {
+                id: '',
+                student_id: student.id,
+                subject: subject,
+                iat1: null,
+                iat2: null,
+                model: null,
+                signed: false,
+                assignmentSubmitted: false,
+                departmentFine: 0,
+                created_at: new Date().toISOString()
+              };
+            }
+            
+            marksToSave.push({
+              subject: existingMark.subject,
+              iat1: existingMark.iat1,
+              iat2: existingMark.iat2,
+              model: existingMark.model,
+              signed: existingMark.signed,
+              departmentFine: existingMark.departmentFine ?? 0,
+              assignmentSubmitted: existingMark.assignmentSubmitted ?? false
+            });
+          }
 
+          console.log(`[DEBUG] Marks to save for ${student.name}:`, marksToSave);
           await api.updateMarks(student.id, marksToSave);
+          console.log(`[DEBUG] Successfully saved marks for ${student.name}`);
           successCount++;
         } catch (error) {
-          console.error(`Error saving marks for ${student.name}:`, error);
+          console.error(`[ERROR] Failed to save marks for ${student.name}:`, error);
+          console.error(`[ERROR] Student ID: ${student.id}`);
+          console.error(`[ERROR] Error details:`, error instanceof Error ? error.message : error);
           errorCount++;
         }
       }
@@ -410,15 +441,15 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
       } else {
         toast({
           title: "Partial Success",
-          description: `Saved ${successCount} students, ${errorCount} failed`,
+          description: `Saved ${successCount} students, ${errorCount} failed. Check console for details.`,
           variant: "destructive"
         });
       }
     } catch (error) {
-      console.error('Error saving all changes:', error);
+      console.error('[ERROR] Error saving all changes:', error);
       toast({
         title: "Error",
-        description: "Failed to save changes",
+        description: "Failed to save changes. Check console for details.",
         variant: "destructive"
       });
     } finally {

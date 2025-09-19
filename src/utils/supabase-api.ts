@@ -377,22 +377,43 @@ export const api = {
         if (error && (error.message.includes('column') || error.message.includes('does not exist'))) {
           console.warn('Column error, trying fallback approach:', error.message);
           
-          // Try without assignmentSubmitted if it doesn't exist
-          const fallbackData = {
+          // Try with assignmentSubmitted but different column name for departmentFine
+          let fallbackData = {
             student_id: studentId,
             subject: mark.subject,
             iat1: mark.iat1 ?? null,
             iat2: mark.iat2 ?? null,
             model: mark.model ?? null,
             signed: mark.signed ?? false,
+            assignmentSubmitted: mark.assignmentSubmitted ?? false,
             department_fine: mark.departmentFine ?? 0
           };
           
-          const fallbackResult = await supabase
+          let fallbackResult = await supabase
             .from('marks')
             .upsert(fallbackData, {
               onConflict: 'student_id,subject'
             });
+          
+          // If still failing, try without assignmentSubmitted
+          if (fallbackResult.error && fallbackResult.error.message.includes('assignmentSubmitted')) {
+            console.warn('assignmentSubmitted column not available, trying without it');
+            const basicFallbackData: any = {
+              student_id: studentId,
+              subject: mark.subject,
+              iat1: mark.iat1 ?? null,
+              iat2: mark.iat2 ?? null,
+              model: mark.model ?? null,
+              signed: mark.signed ?? false,
+              department_fine: mark.departmentFine ?? 0
+            };
+            
+            fallbackResult = await supabase
+              .from('marks')
+              .upsert(basicFallbackData, {
+                onConflict: 'student_id,subject'
+              });
+          }
           
           error = fallbackResult.error;
         }
