@@ -564,7 +564,7 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
                         </td>
                         <td className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center text-black">
                           {config.showDepartmentFees ? (
-                            mark?.departmentFine === 0 ? 'Paid' : 'Pending'
+                            mark?.departmentFine === 0 ? 'Paid' : 'Unpaid'
                           ) : ''}
                         </td>
                         <td className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center text-black">

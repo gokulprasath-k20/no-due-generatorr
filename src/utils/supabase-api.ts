@@ -232,7 +232,7 @@ export const api = {
         ...mark,
         signed: (mark as any).signed ?? false,
         assignmentSubmitted: (mark as any).assignmentsubmitted ?? (mark as any).assignmentSubmitted ?? false,
-        departmentFine: (mark as any).departmentfine ?? (mark as any).departmentFine ?? (mark as any).department_fine ?? 0
+        departmentFine: (mark as any).departmentfine ?? (mark as any).departmentFine ?? (mark as any).department_fine ?? 100
       }));
 
       return { student, marks: processedMarks };
@@ -330,7 +330,7 @@ export const api = {
         model: null,
         signed: false,
         assignmentsubmitted: false,
-        departmentfine: 0
+        departmentfine: 100  // Default to 100 (unpaid)
       }));
 
       const { error: marksError } = await supabase
@@ -361,7 +361,7 @@ export const api = {
           model: mark.model ?? null,
           signed: mark.signed ?? false,
           assignmentsubmitted: mark.assignmentSubmitted ?? false,
-          departmentfine: mark.departmentFine ?? 0
+          departmentfine: mark.departmentFine ?? 100
         };
 
         console.log(`[DEBUG] Updating marks for ${mark.subject}:`, markData);
@@ -386,7 +386,7 @@ export const api = {
             model: mark.model ?? null,
             signed: mark.signed ?? false,
             assignmentsubmitted: mark.assignmentSubmitted ?? false,
-            department_fine: mark.departmentFine ?? 0
+            department_fine: mark.departmentFine ?? 100
           };
           
           let fallbackResult = await supabase
@@ -405,7 +405,7 @@ export const api = {
               iat2: mark.iat2 ?? null,
               model: mark.model ?? null,
               signed: mark.signed ?? false,
-              department_fine: mark.departmentFine ?? 0
+              department_fine: mark.departmentFine ?? 100
             };
             
             fallbackResult = await supabase

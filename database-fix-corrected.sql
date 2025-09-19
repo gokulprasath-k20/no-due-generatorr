@@ -55,11 +55,15 @@ END $$;
 -- 3. Update the API to use the correct column names
 -- Since PostgreSQL has converted the columns to lowercase, we need to update our API
 
--- 4. Update existing records to ensure all have default values
+-- 4.-- Update existing records to ensure all have default values
+-- Set departmentfine to 100 (unpaid) by default, not 0 (paid)
 UPDATE marks 
 SET 
     assignmentsubmitted = COALESCE(assignmentsubmitted, FALSE),
-    departmentfine = COALESCE(departmentfine, 0),
+    departmentfine = CASE 
+        WHEN departmentfine IS NULL THEN 100 
+        ELSE departmentfine 
+    END,
     signed = COALESCE(signed, FALSE)
 WHERE 
     assignmentsubmitted IS NULL 
@@ -105,7 +109,7 @@ BEGIN
                 NULL, 
                 FALSE, 
                 FALSE, 
-                0
+                100
             WHERE NOT EXISTS (
                 SELECT 1 FROM marks 
                 WHERE student_id = student_record.id AND subject = subject_name

@@ -27,7 +27,7 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
   const [loadingMarks, setLoadingMarks] = useState(false);
   const [saving, setSaving] = useState(false);
   const [subjects, setSubjects] = useState<string[]>([]);
-  const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+  const inputRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
   // Get filtered students for selected semester
   const getFilteredStudents = (): Student[] => {
@@ -528,66 +528,71 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
     return `${numStr}th`;
   };
 
-  // Handle keyboard navigation (Enter, Arrow keys)
+  // Enhanced keyboard navigation with proper directional movement
   const handleKeyDown = (e: React.KeyboardEvent, currentKey: string) => {
-    const allKeys = Object.keys(inputRefs.current).sort();
-    const currentIndex = allKeys.indexOf(currentKey);
+    const [currentStudentId, currentField] = currentKey.split('-');
+    const students = studentsWithMarks;
+    const fields = ['iat1', 'iat2', 'model', 'assignment', 'fees'];
     
-    let targetIndex = -1;
+    const currentStudentIndex = students.findIndex(s => s.id === currentStudentId);
+    const currentFieldIndex = fields.indexOf(currentField);
+    
+    let targetStudentIndex = currentStudentIndex;
+    let targetFieldIndex = currentFieldIndex;
     
     switch (e.key) {
       case 'Enter':
       case 'ArrowDown':
         e.preventDefault();
-        // Move to next input (down)
-        targetIndex = currentIndex < allKeys.length - 1 ? currentIndex + 1 : 0;
+        // Move to same field in next student (downward)
+        targetStudentIndex = currentStudentIndex < students.length - 1 ? currentStudentIndex + 1 : 0;
         break;
         
       case 'ArrowUp':
         e.preventDefault();
-        // Move to previous input (up)
-        targetIndex = currentIndex > 0 ? currentIndex - 1 : allKeys.length - 1;
+        // Move to same field in previous student (upward)
+        targetStudentIndex = currentStudentIndex > 0 ? currentStudentIndex - 1 : students.length - 1;
         break;
         
       case 'ArrowRight':
         e.preventDefault();
-        // Move to next field in same row
-        const currentStudentId = currentKey.split('-')[0];
-        const currentField = currentKey.split('-')[1];
-        const fields = ['iat1', 'iat2', 'model'];
-        const fieldIndex = fields.indexOf(currentField);
-        if (fieldIndex < fields.length - 1) {
-          const nextField = fields[fieldIndex + 1];
-          const nextKey = `${currentStudentId}-${nextField}`;
-          if (inputRefs.current[nextKey]) {
-            targetIndex = allKeys.indexOf(nextKey);
-          }
+        // Move to next field in same student (rightward)
+        if (currentFieldIndex < fields.length - 1) {
+          targetFieldIndex = currentFieldIndex + 1;
+        } else {
+          // If at last field, move to first field of next student
+          targetFieldIndex = 0;
+          targetStudentIndex = currentStudentIndex < students.length - 1 ? currentStudentIndex + 1 : 0;
         }
         break;
         
       case 'ArrowLeft':
         e.preventDefault();
-        // Move to previous field in same row
-        const currentStudentIdLeft = currentKey.split('-')[0];
-        const currentFieldLeft = currentKey.split('-')[1];
-        const fieldsLeft = ['iat1', 'iat2', 'model'];
-        const fieldIndexLeft = fieldsLeft.indexOf(currentFieldLeft);
-        if (fieldIndexLeft > 0) {
-          const prevField = fieldsLeft[fieldIndexLeft - 1];
-          const prevKey = `${currentStudentIdLeft}-${prevField}`;
-          if (inputRefs.current[prevKey]) {
-            targetIndex = allKeys.indexOf(prevKey);
-          }
+        // Move to previous field in same student (leftward)
+        if (currentFieldIndex > 0) {
+          targetFieldIndex = currentFieldIndex - 1;
+        } else {
+          // If at first field, move to last field of previous student
+          targetFieldIndex = fields.length - 1;
+          targetStudentIndex = currentStudentIndex > 0 ? currentStudentIndex - 1 : students.length - 1;
         }
         break;
+        
+      default:
+        return; // Don't prevent default for other keys
     }
     
-    if (targetIndex >= 0 && targetIndex < allKeys.length) {
-      const targetKey = allKeys[targetIndex];
-      const targetInput = inputRefs.current[targetKey];
-      if (targetInput) {
-        targetInput.focus();
-        targetInput.select();
+    // Find target input and focus
+    const targetStudent = students[targetStudentIndex];
+    const targetField = fields[targetFieldIndex];
+    const targetKey = getInputKey(targetStudent.id, targetField);
+    const targetElement = inputRefs.current[targetKey];
+    
+    if (targetElement && !(targetElement as any).disabled) {
+      targetElement.focus();
+      // Only call select() if it's an input element
+      if ('select' in targetElement && typeof (targetElement as any).select === 'function') {
+        (targetElement as HTMLInputElement).select();
       }
     }
   };
@@ -794,7 +799,14 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
                           }}
                           disabled={selectedSubject === 'all'}
                         >
-                          <SelectTrigger className="w-32 h-8 text-sm">
+                          <SelectTrigger 
+                            ref={(el) => {
+                              const key = getInputKey(student.id, 'assignment');
+                              inputRefs.current[key] = el;
+                            }}
+                            className="w-32 h-8 text-sm"
+                            onKeyDown={(e) => handleKeyDown(e, getInputKey(student.id, 'assignment'))}
+                          >
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -814,12 +826,19 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
                           }}
                           disabled={selectedSubject === 'all'}
                         >
-                          <SelectTrigger className="w-24 h-8 text-sm">
+                          <SelectTrigger 
+                            ref={(el) => {
+                              const key = getInputKey(student.id, 'fees');
+                              inputRefs.current[key] = el;
+                            }}
+                            className="w-24 h-8 text-sm"
+                            onKeyDown={(e) => handleKeyDown(e, getInputKey(student.id, 'fees'))}
+                          >
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="paid">Paid</SelectItem>
-                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="pending">Unpaid</SelectItem>
                           </SelectContent>
                         </Select>
                       </td>
