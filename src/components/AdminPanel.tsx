@@ -7,14 +7,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from '@/hooks/use-toast';
 import { api } from '@/utils/supabase-api';
 import { Student, Mark, SUBJECTS_BY_YEAR, getSubjectsForYearSem } from '@/types';
-import { Loader2, Search, UserPlus, Save, LogOut } from 'lucide-react';
+import { Loader2, Search, UserPlus, Save, LogOut, Users, User } from 'lucide-react';
 import { shouldShowMarksColumns } from '@/utils/subject-config';
+import { StudentSheet } from './StudentSheet';
 
 interface AdminPanelProps {
   onLogout: () => void;
 }
 
 export function AdminPanel({ onLogout }: AdminPanelProps) {
+  const [activeTab, setActiveTab] = useState<'individual' | 'sheet'>('individual');
   const [searchRegNo, setSearchRegNo] = useState('');
   const [student, setStudent] = useState<Student | null>(null);
   const [marks, setMarks] = useState<Mark[]>([]);
@@ -546,8 +548,31 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
           </Button>
         </div>
 
-        {/* Search Student */}
-        <Card>
+        {/* Tab Navigation */}
+        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+          <Button
+            variant={activeTab === 'individual' ? 'default' : 'ghost'}
+            onClick={() => setActiveTab('individual')}
+            className="flex-1 sm:flex-none"
+          >
+            <User className="mr-2 h-4 w-4" />
+            Individual Student
+          </Button>
+          <Button
+            variant={activeTab === 'sheet' ? 'default' : 'ghost'}
+            onClick={() => setActiveTab('sheet')}
+            className="flex-1 sm:flex-none"
+          >
+            <Users className="mr-2 h-4 w-4" />
+            Student Sheet
+          </Button>
+        </div>
+
+        {/* Individual Student Tab */}
+        {activeTab === 'individual' && (
+          <>
+            {/* Search Student */}
+            <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Search className="h-5 w-5" />
@@ -1033,6 +1058,17 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
               </Button>
             </CardContent>
           </Card>
+        )}
+        </>
+        )}
+
+        {/* Student Sheet Tab */}
+        {activeTab === 'sheet' && (
+          <StudentSheet 
+            allStudents={allStudents}
+            onRefresh={fetchAllStudents}
+            loading={loadingStudents}
+          />
         )}
     </div>
   );
