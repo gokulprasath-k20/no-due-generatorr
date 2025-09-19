@@ -231,8 +231,8 @@ export const api = {
       const processedMarks = (marks || []).map(mark => ({
         ...mark,
         signed: (mark as any).signed ?? false,
-        assignmentSubmitted: (mark as any).assignmentSubmitted ?? false,
-        departmentFine: (mark as any).departmentFine ?? 0
+        assignmentSubmitted: (mark as any).assignmentsubmitted ?? (mark as any).assignmentSubmitted ?? false,
+        departmentFine: (mark as any).departmentfine ?? (mark as any).departmentFine ?? (mark as any).department_fine ?? 0
       }));
 
       return { student, marks: processedMarks };
@@ -329,8 +329,8 @@ export const api = {
         iat2: null,
         model: null,
         signed: false,
-        assignmentSubmitted: false,
-        departmentFine: 0
+        assignmentsubmitted: false,
+        departmentfine: 0
       }));
 
       const { error: marksError } = await supabase
@@ -360,8 +360,8 @@ export const api = {
           iat2: mark.iat2 ?? null,
           model: mark.model ?? null,
           signed: mark.signed ?? false,
-          assignmentSubmitted: mark.assignmentSubmitted ?? false,
-          departmentFine: mark.departmentFine ?? 0
+          assignmentsubmitted: mark.assignmentSubmitted ?? false,
+          departmentfine: mark.departmentFine ?? 0
         };
 
         console.log(`[DEBUG] Updating marks for ${mark.subject}:`, markData);
@@ -377,7 +377,7 @@ export const api = {
         if (error && (error.message.includes('column') || error.message.includes('does not exist'))) {
           console.warn('Column error, trying fallback approach:', error.message);
           
-          // Try with assignmentSubmitted but different column name for departmentFine
+          // Try with assignmentsubmitted but different column name for departmentfine
           let fallbackData = {
             student_id: studentId,
             subject: mark.subject,
@@ -385,7 +385,7 @@ export const api = {
             iat2: mark.iat2 ?? null,
             model: mark.model ?? null,
             signed: mark.signed ?? false,
-            assignmentSubmitted: mark.assignmentSubmitted ?? false,
+            assignmentsubmitted: mark.assignmentSubmitted ?? false,
             department_fine: mark.departmentFine ?? 0
           };
           
@@ -395,9 +395,9 @@ export const api = {
               onConflict: 'student_id,subject'
             });
           
-          // If still failing, try without assignmentSubmitted
-          if (fallbackResult.error && fallbackResult.error.message.includes('assignmentSubmitted')) {
-            console.warn('assignmentSubmitted column not available, trying without it');
+          // If still failing, try without assignmentsubmitted
+          if (fallbackResult.error && fallbackResult.error.message.includes('assignmentsubmitted')) {
+            console.warn('assignmentsubmitted column not available, trying without it');
             const basicFallbackData: any = {
               student_id: studentId,
               subject: mark.subject,
