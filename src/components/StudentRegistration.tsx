@@ -153,31 +153,31 @@ export function StudentRegistration({ onBack, onRegistrationSuccess }: StudentRe
   };
 
   return (
-    <div className="max-w-md mx-auto">
+    <div className="max-w-md mx-auto p-2 sm:p-0">
         <Button 
           variant="ghost" 
           onClick={onBack} 
-          className="mb-4 no-print"
+          className="mb-4 no-print h-12 px-4 rounded-xl"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" />
+          <ArrowLeft className="mr-2 h-5 w-5" />
           Back to Login
         </Button>
         
-        <Card className="shadow-lg border">
-          <CardHeader className="text-center space-y-2">
-            <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4">
-              <UserPlus className="w-8 h-8 text-primary-foreground" />
+        <Card className="shadow-lg border mobile-card">
+          <CardHeader className="text-center space-y-3 pb-4">
+            <div className="mx-auto w-20 h-20 sm:w-16 sm:h-16 bg-primary rounded-full flex items-center justify-center mb-4 shadow-lg">
+              <UserPlus className="w-10 h-10 sm:w-8 sm:h-8 text-primary-foreground" />
             </div>
-            <CardTitle className="text-2xl font-bold text-foreground">
+            <CardTitle className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
               Student Registration
             </CardTitle>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-sm sm:text-base px-2">
               Enter your details to register for a no-due certificate
             </p>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="name" className="text-sm font-medium text-foreground">
+          <CardContent className="space-y-6 pt-2">
+            <div className="space-y-3">
+              <label htmlFor="name" className="text-base font-medium text-foreground block">
                 Full Name
               </label>
               <Input
@@ -186,12 +186,12 @@ export function StudentRegistration({ onBack, onRegistrationSuccess }: StudentRe
                 placeholder="Enter your full name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="text-lg"
+                className="text-lg h-12 rounded-xl border-2 focus:border-primary transition-colors"
               />
             </div>
             
-            <div className="space-y-2">
-              <label htmlFor="register" className="text-sm font-medium text-foreground">
+            <div className="space-y-3">
+              <label htmlFor="register" className="text-base font-medium text-foreground block">
                 Register Number
               </label>
               <Input
@@ -200,17 +200,17 @@ export function StudentRegistration({ onBack, onRegistrationSuccess }: StudentRe
                 placeholder="Enter your register number"
                 value={registerNumber}
                 onChange={(e) => setRegisterNumber(e.target.value)}
-                className="font-mono text-lg"
+                className="font-mono text-lg h-12 rounded-xl border-2 focus:border-primary transition-colors"
               />
             </div>
             
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="semester" className="text-sm font-medium text-foreground">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div className="space-y-3">
+                <label htmlFor="semester" className="text-base font-medium text-foreground block">
                   Semester
                 </label>
                 <Select value={semester} onValueChange={setSemester}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-12 rounded-xl border-2 focus:border-primary transition-colors">
                     <SelectValue placeholder="Select semester" />
                   </SelectTrigger>
                   <SelectContent>
@@ -224,12 +224,12 @@ export function StudentRegistration({ onBack, onRegistrationSuccess }: StudentRe
                 </Select>
               </div>
               
-              <div className="space-y-2">
-                <label htmlFor="department" className="text-sm font-medium text-foreground">
+              <div className="space-y-3">
+                <label htmlFor="department" className="text-base font-medium text-foreground block">
                   Department
                 </label>
                 <Select value={department} onValueChange={setDepartment}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-12 rounded-xl border-2 focus:border-primary transition-colors">
                     <SelectValue placeholder="Select department" />
                   </SelectTrigger>
                   <SelectContent>
@@ -245,16 +245,19 @@ export function StudentRegistration({ onBack, onRegistrationSuccess }: StudentRe
             
             <Button 
               onClick={handleRegister} 
-              className="w-full"
+              className="w-full h-12 text-base font-semibold rounded-xl shadow-lg mt-8"
               disabled={loading}
             >
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Registering...
                 </>
               ) : (
-                'Register'
+                <>
+                  <UserPlus className="mr-2 h-5 w-5" />
+                  Register Student
+                </>
               )}
             </Button>
           </CardContent>

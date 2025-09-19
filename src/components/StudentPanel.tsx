@@ -114,22 +114,22 @@ export function StudentPanel() {
   return (
     <Layout>
       {!showPreview && !showRegistration && (
-        <div className="flex items-center justify-center p-4">
-          <Card className="w-full max-w-md shadow-lg border">
-            <CardHeader className="text-center space-y-2">
-              <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4">
-                <Search className="w-8 h-8 text-primary-foreground" />
+        <div className="flex items-center justify-center p-2 sm:p-4 min-h-[calc(100vh-200px)]">
+          <Card className="w-full max-w-md shadow-lg border mobile-card">
+            <CardHeader className="text-center space-y-3 pb-4">
+              <div className="mx-auto w-20 h-20 sm:w-16 sm:h-16 bg-primary rounded-full flex items-center justify-center mb-4 shadow-lg">
+                <Search className="w-10 h-10 sm:w-8 sm:h-8 text-primary-foreground" />
               </div>
-              <CardTitle className="text-2xl font-bold text-foreground">
+              <CardTitle className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
                 No Due Certificate Generator
               </CardTitle>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground text-sm sm:text-base px-2">
                 Enter your register number to view and generate your certificate
               </p>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="register" className="text-sm font-medium text-foreground">
+            <CardContent className="space-y-6 pt-2">
+              <div className="space-y-3">
+                <label htmlFor="register" className="text-base font-medium text-foreground block">
                   Register Number
                 </label>
                 <Input
@@ -139,43 +139,40 @@ export function StudentPanel() {
                   value={registerNumber}
                   onChange={(e) => setRegisterNumber(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="text-center font-mono text-lg"
+                  className="text-center font-mono text-lg h-12 rounded-xl border-2 focus:border-primary transition-colors"
                 />
               </div>
               <Button 
                 onClick={handleSearch} 
-                className="w-full"
+                className="w-full h-12 text-base font-semibold rounded-xl shadow-lg"
                 disabled={loading}
               >
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Searching...
                   </>
                 ) : (
-                  'View Certificate'
+                  <>
+                    <Search className="mr-2 h-5 w-5" />
+                    Search Student
+                  </>
                 )}
               </Button>
               
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    Or
-                  </span>
-                </div>
+              <div className="text-center pt-4 border-t border-border">
+                <p className="text-sm text-muted-foreground mb-3">
+                  Don't have an account?
+                </p>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowRegistration(true)}
+                  className="w-full h-12 text-base font-semibold rounded-xl border-2"
+                >
+                  <UserPlus className="mr-2 h-5 w-5" />
+                  Register New Student
+                </Button>
               </div>
-              
-              <Button 
-                variant="outline"
-                onClick={() => setShowRegistration(true)}
-                className="w-full"
-              >
-                <UserPlus className="mr-2 h-4 w-4" />
-                New Student? Register Here
-              </Button>
             </CardContent>
           </Card>
         </div>
