@@ -539,7 +539,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
     <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 px-2 sm:px-4">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Admin Panel</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Admin Panel</h1>
           <Button variant="outline" onClick={onLogout} className="w-full sm:w-auto">
             <LogOut className="mr-2 h-4 w-4" />
             Logout

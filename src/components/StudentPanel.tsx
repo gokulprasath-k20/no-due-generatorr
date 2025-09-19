@@ -115,21 +115,21 @@ export function StudentPanel() {
     <Layout>
       {!showPreview && !showRegistration && (
         <div className="flex items-center justify-center p-4">
-          <Card className="w-full max-w-md shadow-xl">
+          <Card className="w-full max-w-md shadow-lg border">
             <CardHeader className="text-center space-y-2">
-              <div className="mx-auto w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mb-4">
-                <Search className="w-8 h-8 text-white" />
+              <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4">
+                <Search className="w-8 h-8 text-primary-foreground" />
               </div>
-              <CardTitle className="text-2xl font-bold text-gray-800">
+              <CardTitle className="text-2xl font-bold text-foreground">
                 No Due Certificate Generator
               </CardTitle>
-              <p className="text-gray-600 text-sm">
+              <p className="text-muted-foreground text-sm">
                 Enter your register number to view and generate your certificate
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <label htmlFor="register" className="text-sm font-medium text-gray-700">
+                <label htmlFor="register" className="text-sm font-medium text-foreground">
                   Register Number
                 </label>
                 <Input

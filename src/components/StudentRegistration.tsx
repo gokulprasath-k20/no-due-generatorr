@@ -163,21 +163,21 @@ export function StudentRegistration({ onBack, onRegistrationSuccess }: StudentRe
           Back to Login
         </Button>
         
-        <Card className="shadow-xl border-0">
+        <Card className="shadow-lg border">
           <CardHeader className="text-center space-y-2">
-            <div className="mx-auto w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mb-4">
-              <UserPlus className="w-8 h-8 text-white" />
+            <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4">
+              <UserPlus className="w-8 h-8 text-primary-foreground" />
             </div>
-            <CardTitle className="text-2xl font-bold text-gray-800">
+            <CardTitle className="text-2xl font-bold text-foreground">
               Student Registration
             </CardTitle>
-            <p className="text-gray-600 text-sm">
+            <p className="text-muted-foreground text-sm">
               Enter your details to register for a no-due certificate
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="name" className="text-sm font-medium text-gray-700">
+              <label htmlFor="name" className="text-sm font-medium text-foreground">
                 Full Name
               </label>
               <Input
@@ -191,7 +191,7 @@ export function StudentRegistration({ onBack, onRegistrationSuccess }: StudentRe
             </div>
             
             <div className="space-y-2">
-              <label htmlFor="register" className="text-sm font-medium text-gray-700">
+              <label htmlFor="register" className="text-sm font-medium text-foreground">
                 Register Number
               </label>
               <Input
@@ -206,7 +206,7 @@ export function StudentRegistration({ onBack, onRegistrationSuccess }: StudentRe
             
             <div className="space-y-4">
               <div className="space-y-2">
-                <label htmlFor="semester" className="text-sm font-medium text-gray-700">
+                <label htmlFor="semester" className="text-sm font-medium text-foreground">
                   Semester
                 </label>
                 <Select value={semester} onValueChange={setSemester}>
@@ -225,7 +225,7 @@ export function StudentRegistration({ onBack, onRegistrationSuccess }: StudentRe
               </div>
               
               <div className="space-y-2">
-                <label htmlFor="department" className="text-sm font-medium text-gray-700">
+                <label htmlFor="department" className="text-sm font-medium text-foreground">
                   Department
                 </label>
                 <Select value={department} onValueChange={setDepartment}>
