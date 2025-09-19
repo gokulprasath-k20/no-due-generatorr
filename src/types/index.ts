@@ -41,11 +41,22 @@ export const SUBJECTS_BY_YEAR = {
 export const getSubjectsForYearSem = (year: number, semester?: number): string[] => {
   if (!semester) {
     // Fallback to year-based subjects if no semester specified
-    return SUBJECTS_BY_YEAR[year as keyof typeof SUBJECTS_BY_YEAR] || [];
+    return SUBJECTS_BY_YEAR[year as keyof typeof SUBJECTS_BY_YEAR] || SUBJECTS_BY_YEAR_SEM['2-3'];
   }
   
   const key = `${year}-${semester}` as keyof typeof SUBJECTS_BY_YEAR_SEM;
-  return SUBJECTS_BY_YEAR_SEM[key] || [];
+  const subjects = SUBJECTS_BY_YEAR_SEM[key];
+  
+  if (!subjects || subjects.length === 0) {
+    console.warn(`No subjects found for year ${year}, semester ${semester}. Using default subjects.`);
+    // Fallback to appropriate default based on year
+    if (year === 2) return SUBJECTS_BY_YEAR_SEM['2-3'];
+    if (year === 3) return SUBJECTS_BY_YEAR_SEM['3-5'];
+    if (year === 4) return SUBJECTS_BY_YEAR_SEM['4-7'];
+    return SUBJECTS_BY_YEAR_SEM['2-3']; // Ultimate fallback
+  }
+  
+  return subjects;
 };
 
 // Helper function to get year from semester

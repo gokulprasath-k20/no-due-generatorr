@@ -98,6 +98,14 @@ export const api = {
 
     // Create empty marks for all subjects based on year and semester
     const subjects = getSubjectsForYearSem(year, semester);
+    console.log('API: Creating marks for subjects:', subjects, 'year:', year, 'semester:', semester);
+    
+    if (subjects.length === 0) {
+      console.warn('API: No subjects found for year:', year, 'semester:', semester);
+      console.warn('API: Student created successfully but no marks will be created');
+      return data; // Return successfully even if no subjects
+    }
+
     const marksToInsert = subjects.map(subject => ({
       student_id: data.id,
       subject,
@@ -109,6 +117,8 @@ export const api = {
       departmentFine: 0
     }));
 
+    console.log('API: Inserting marks:', marksToInsert);
+
     const { error: marksError } = await supabase
       .from('marks')
       .insert(marksToInsert);
@@ -116,7 +126,10 @@ export const api = {
     if (marksError) {
       console.error('API: Error creating marks:', marksError);
       console.error('API: Marks error details:', { message: marksError.message, code: marksError.code, details: marksError.details, hint: marksError.hint });
-      // Don't throw error for marks creation failure in registration
+      // Don't throw error for marks creation failure in registration - student is already created
+      console.warn('API: Student registration completed successfully despite marks creation failure');
+    } else {
+      console.log('API: Marks created successfully for student:', data.id);
     }
 
     return data;

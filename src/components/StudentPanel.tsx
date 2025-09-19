@@ -35,7 +35,7 @@ export function StudentPanel() {
       if (!foundStudent) {
         toast({
           title: "Student Not Found",
-          description: "No student found with this register number",
+          description: "No student found with this register number. Please check the register number and try again.",
           variant: "destructive"
         });
         return;
@@ -72,10 +72,20 @@ export function StudentPanel() {
     setMarks(newMarks);
   };
 
-  const handleRegistrationSuccess = (regNumber: string) => {
+  const handleRegistrationSuccess = async (regNumber: string) => {
     setRegisterNumber(regNumber);
     setShowRegistration(false);
-    handleSearch();
+    
+    // Add a small delay to ensure database transaction is committed
+    setTimeout(async () => {
+      try {
+        await handleSearch();
+      } catch (error) {
+        console.error('Error during post-registration search:', error);
+        // Don't show error toast here as registration was successful
+        // The user can manually search if needed
+      }
+    }, 500);
   };
 
   const handleBackFromRegistration = () => {
