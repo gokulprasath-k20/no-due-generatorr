@@ -280,6 +280,99 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
     return mark.assignmentSubmitted && mark.departmentFine === 0 ? 'Completed' : 'Pending';
   };
 
+  // Get average mark value across all academic subjects
+  const getAverageMarkValue = (studentId: string, field: 'iat1' | 'iat2' | 'model'): string => {
+    const student = studentsWithMarks.find(s => s.id === studentId);
+    if (!student) return '';
+    
+    const academicSubjects = subjects.filter(subject => shouldShowMarksColumns(subject));
+    const marks = academicSubjects.map(subject => {
+      const mark = student.marks.find(m => m.subject === subject);
+      return mark?.[field];
+    }).filter(value => value !== null && value !== undefined);
+    
+    if (marks.length === 0) return '';
+    
+    const average = marks.reduce((sum, mark) => sum + (mark as number), 0) / marks.length;
+    return Math.round(average).toString();
+  };
+
+  // Update marks for all academic subjects
+  const updateAllSubjectMarks = (studentId: string, field: 'iat1' | 'iat2' | 'model', value: string) => {
+    const numValue = value === '' ? null : parseInt(value);
+    const academicSubjects = subjects.filter(subject => shouldShowMarksColumns(subject));
+    
+    academicSubjects.forEach(subject => {
+      updateMark(studentId, subject, field, value);
+    });
+  };
+
+  // Get overall assignment status
+  const getOverallAssignmentStatus = (studentId: string): string => {
+    const student = studentsWithMarks.find(s => s.id === studentId);
+    if (!student) return 'not-submitted';
+    
+    const academicSubjects = subjects.filter(subject => shouldShowMarksColumns(subject));
+    const submittedCount = academicSubjects.filter(subject => {
+      const mark = student.marks.find(m => m.subject === subject);
+      return mark?.assignmentSubmitted;
+    }).length;
+    
+    return submittedCount === academicSubjects.length ? 'submitted' : 'not-submitted';
+  };
+
+  // Update assignment submission for all academic subjects
+  const updateAllAssignmentSubmissions = (studentId: string, submitted: boolean) => {
+    const academicSubjects = subjects.filter(subject => shouldShowMarksColumns(subject));
+    academicSubjects.forEach(subject => {
+      updateAssignmentSubmission(studentId, subject, submitted);
+    });
+  };
+
+  // Get overall department fees status
+  const getOverallDepartmentFeesStatus = (studentId: string): boolean => {
+    const student = studentsWithMarks.find(s => s.id === studentId);
+    if (!student) return false;
+    
+    const academicSubjects = subjects.filter(subject => shouldShowMarksColumns(subject));
+    const paidCount = academicSubjects.filter(subject => {
+      const mark = student.marks.find(m => m.subject === subject);
+      return mark?.departmentFine === 0;
+    }).length;
+    
+    return paidCount === academicSubjects.length;
+  };
+
+  // Update department fees for all academic subjects
+  const updateAllDepartmentFees = (studentId: string, isPaid: boolean) => {
+    const academicSubjects = subjects.filter(subject => shouldShowMarksColumns(subject));
+    academicSubjects.forEach(subject => {
+      updateDepartmentFees(studentId, subject, isPaid);
+    });
+  };
+
+  // Get overall status
+  const getOverallStatus = (studentId: string): 'Completed' | 'Pending' => {
+    const student = studentsWithMarks.find(s => s.id === studentId);
+    if (!student) return 'Pending';
+    
+    // Check all subjects (both academic and non-academic)
+    const allCompleted = subjects.every(subject => {
+      const mark = student.marks.find(m => m.subject === subject);
+      if (!mark) return false;
+      
+      // For Office and Library, only check signature
+      if (subject === 'Office' || subject === 'Library') {
+        return mark.signed;
+      }
+      
+      // For academic subjects, check assignment submission and department fees
+      return mark.assignmentSubmitted && mark.departmentFine === 0;
+    });
+    
+    return allCompleted ? 'Completed' : 'Pending';
+  };
+
   // Save all changes
   const saveAllChanges = async () => {
     setSaving(true);
@@ -423,151 +516,121 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
               </div>
             </div>
 
-            {/* Excel-like Table */}
+            {/* Simple Excel-like Table */}
             <div className="overflow-x-auto border border-gray-300 rounded-lg">
               <table className="w-full border-collapse bg-white">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border border-gray-300 px-3 py-2 text-left font-medium text-sm sticky left-0 bg-gray-100 z-10">
-                      Student Details
-                    </th>
-                    {subjects.map((subject) => (
-                      <th key={subject} className="border border-gray-300 px-2 py-2 text-center font-medium text-sm min-w-[200px]">
-                        <div className="space-y-1">
-                          <div className="font-semibold">{subject}</div>
-                          <div className="flex justify-center gap-1 text-xs">
-                            {shouldShowMarksColumns(subject) && (
-                              <>
-                                <span className="bg-blue-100 px-1 rounded">IAT1</span>
-                                <span className="bg-blue-100 px-1 rounded">IAT2</span>
-                                <span className="bg-blue-100 px-1 rounded">Model</span>
-                                <span className="bg-green-100 px-1 rounded">Assign</span>
-                                <span className="bg-yellow-100 px-1 rounded">Fees</span>
-                              </>
-                            )}
-                            <span className="bg-purple-100 px-1 rounded">Sign</span>
-                            <span className="bg-gray-100 px-1 rounded">Status</span>
-                          </div>
-                        </div>
-                      </th>
-                    ))}
+                    <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-sm">Name</th>
+                    <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-sm">Reg.No</th>
+                    <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-sm">IAT1</th>
+                    <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-sm">IAT2</th>
+                    <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-sm">MODEL</th>
+                    <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-sm">ASSIGNMENT SUBMISSION</th>
+                    <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-sm">DEPARTMENTAL FEES</th>
+                    <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-sm">STATUS</th>
                   </tr>
                 </thead>
                 <tbody>
                   {studentsWithMarks.map((student, index) => (
                     <tr key={student.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      {/* Student Details - Sticky Column */}
-                      <td className="border border-gray-300 px-3 py-2 sticky left-0 bg-inherit z-10">
-                        <div className="space-y-1">
-                          <div className="font-medium text-sm">{student.name}</div>
-                          <div className="text-xs text-gray-600 font-mono">{student.register_number}</div>
-                          <div className="text-xs text-gray-500">{student.department}</div>
-                        </div>
+                      {/* Name */}
+                      <td className="border border-gray-300 px-4 py-3 text-sm font-medium">
+                        {student.name}
                       </td>
                       
-                      {/* Subject Columns */}
-                      {subjects.map((subject) => (
-                        <td key={subject} className="border border-gray-300 px-2 py-2">
-                          <div className="space-y-2">
-                            {shouldShowMarksColumns(subject) && (
-                              <>
-                                {/* Marks Row */}
-                                <div className="flex gap-1">
-                                  <Input
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    value={getMarkValue(student.id, subject, 'iat1')}
-                                    onChange={(e) => updateMark(student.id, subject, 'iat1', e.target.value)}
-                                    className="w-12 h-6 text-xs text-center p-1"
-                                    placeholder="IAT1"
-                                  />
-                                  <Input
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    value={getMarkValue(student.id, subject, 'iat2')}
-                                    onChange={(e) => updateMark(student.id, subject, 'iat2', e.target.value)}
-                                    className="w-12 h-6 text-xs text-center p-1"
-                                    placeholder="IAT2"
-                                  />
-                                  <Input
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    value={getMarkValue(student.id, subject, 'model')}
-                                    onChange={(e) => updateMark(student.id, subject, 'model', e.target.value)}
-                                    className="w-12 h-6 text-xs text-center p-1"
-                                    placeholder="Model"
-                                  />
-                                </div>
-                                
-                                {/* Assignment & Fees Row */}
-                                <div className="flex gap-1">
-                                  <Select
-                                    value={getAssignmentStatus(student.id, subject)}
-                                    onValueChange={(value) => {
-                                      const isSubmitted = value === 'submitted';
-                                      updateAssignmentSubmission(student.id, subject, isSubmitted);
-                                    }}
-                                  >
-                                    <SelectTrigger className="w-16 h-6 text-xs">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="submitted">✓</SelectItem>
-                                      <SelectItem value="not-submitted">✗</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                  
-                                  <Select
-                                    value={getDepartmentFeesStatus(student.id, subject) ? 'paid' : 'pending'}
-                                    onValueChange={(value) => {
-                                      const isPaid = value === 'paid';
-                                      updateDepartmentFees(student.id, subject, isPaid);
-                                    }}
-                                  >
-                                    <SelectTrigger className="w-16 h-6 text-xs">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="paid">Paid</SelectItem>
-                                      <SelectItem value="pending">Pending</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                              </>
-                            )}
-                            
-                            {/* Signature & Status Row */}
-                            <div className="flex gap-1">
-                              <Select
-                                value={getSignatureStatus(student.id, subject) ? 'signed' : 'unsigned'}
-                                onValueChange={(value) => {
-                                  const isSigned = value === 'signed';
-                                  updateSignature(student.id, subject, isSigned);
-                                }}
-                              >
-                                <SelectTrigger className="w-16 h-6 text-xs">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="signed">✓</SelectItem>
-                                  <SelectItem value="unsigned">✗</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              
-                              <span className={`inline-flex items-center justify-center px-2 py-1 rounded text-xs font-medium w-16 h-6 ${
-                                getDueStatus(student.id, subject) === 'Completed' 
-                                  ? 'bg-green-100 text-green-700' 
-                                  : 'bg-yellow-100 text-yellow-700'
-                              }`}>
-                                {getDueStatus(student.id, subject) === 'Completed' ? '✓' : '⏳'}
-                              </span>
-                            </div>
-                          </div>
-                        </td>
-                      ))}
+                      {/* Register Number */}
+                      <td className="border border-gray-300 px-4 py-3 text-sm font-mono">
+                        {student.register_number}
+                      </td>
+                      
+                      {/* IAT1 - Average of all academic subjects */}
+                      <td className="border border-gray-300 px-4 py-3 text-center">
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={getAverageMarkValue(student.id, 'iat1')}
+                          onChange={(e) => updateAllSubjectMarks(student.id, 'iat1', e.target.value)}
+                          className="w-16 h-8 text-center text-sm"
+                          placeholder="0"
+                        />
+                      </td>
+                      
+                      {/* IAT2 - Average of all academic subjects */}
+                      <td className="border border-gray-300 px-4 py-3 text-center">
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={getAverageMarkValue(student.id, 'iat2')}
+                          onChange={(e) => updateAllSubjectMarks(student.id, 'iat2', e.target.value)}
+                          className="w-16 h-8 text-center text-sm"
+                          placeholder="0"
+                        />
+                      </td>
+                      
+                      {/* MODEL - Average of all academic subjects */}
+                      <td className="border border-gray-300 px-4 py-3 text-center">
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={getAverageMarkValue(student.id, 'model')}
+                          onChange={(e) => updateAllSubjectMarks(student.id, 'model', e.target.value)}
+                          className="w-16 h-8 text-center text-sm"
+                          placeholder="0"
+                        />
+                      </td>
+                      
+                      {/* Assignment Submission */}
+                      <td className="border border-gray-300 px-4 py-3 text-center">
+                        <Select
+                          value={getOverallAssignmentStatus(student.id)}
+                          onValueChange={(value) => {
+                            const isSubmitted = value === 'submitted';
+                            updateAllAssignmentSubmissions(student.id, isSubmitted);
+                          }}
+                        >
+                          <SelectTrigger className="w-32 h-8 text-sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="submitted">Submitted</SelectItem>
+                            <SelectItem value="not-submitted">Not Submitted</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      
+                      {/* Departmental Fees */}
+                      <td className="border border-gray-300 px-4 py-3 text-center">
+                        <Select
+                          value={getOverallDepartmentFeesStatus(student.id) ? 'paid' : 'pending'}
+                          onValueChange={(value) => {
+                            const isPaid = value === 'paid';
+                            updateAllDepartmentFees(student.id, isPaid);
+                          }}
+                        >
+                          <SelectTrigger className="w-24 h-8 text-sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="paid">Paid</SelectItem>
+                            <SelectItem value="pending">Pending</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      
+                      {/* Overall Status */}
+                      <td className="border border-gray-300 px-4 py-3 text-center">
+                        <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium ${
+                          getOverallStatus(student.id) === 'Completed' 
+                            ? 'bg-green-100 text-green-800 border border-green-200' 
+                            : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                        }`}>
+                          {getOverallStatus(student.id)}
+                        </span>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
