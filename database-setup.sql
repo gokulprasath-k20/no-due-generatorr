@@ -12,7 +12,7 @@ CREATE TABLE students (
     name TEXT NOT NULL,
     register_number TEXT UNIQUE NOT NULL,
     department TEXT NOT NULL,
-    year INTEGER NOT NULL CHECK (year IN (2, 3)),
+    year INTEGER NOT NULL CHECK (year IN (2, 3, 4)),
     semester INTEGER CHECK (semester BETWEEN 3 AND 8),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -136,6 +136,12 @@ BEGIN
         subjects := ARRAY['TOC', 'AI&ML', 'DBMS', 'WE', 'INTRODUCTION OF OS', 'ESS', 'Office', 'Library'];
     ELSIF NEW.year = 3 AND NEW.semester = 5 THEN
         subjects := ARRAY['Computer Network', 'Distributing Computing', 'Es&IoT', 'Full Stack WebDevelopment', 'Software Testing & Automation', 'Cloud Computing', 'Office', 'Library'];
+    ELSIF NEW.year = 3 AND NEW.semester = 6 THEN
+        subjects := ARRAY['Compiler Design', 'Mobile Application Development', 'Cyber Security', 'Data Science', 'Project Management', 'Office', 'Library'];
+    ELSIF NEW.year = 4 AND NEW.semester = 7 THEN
+        subjects := ARRAY['Machine Learning', 'Big Data Analytics', 'Blockchain Technology', 'Advanced Algorithms', 'Research Methodology', 'Office', 'Library'];
+    ELSIF NEW.year = 4 AND NEW.semester = 8 THEN
+        subjects := ARRAY['Project Work', 'Industrial Training', 'Seminar', 'Comprehensive Viva', 'Office', 'Library'];
     ELSE
         -- Default to 2nd year 3rd semester subjects
         subjects := ARRAY['DM', 'DPCO', 'DSA', 'FDS', 'Oops', 'Office', 'Library'];

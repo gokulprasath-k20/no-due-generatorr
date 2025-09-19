@@ -478,6 +478,12 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
     
     if (selectedSemesterFilter === 'all') {
       console.log('AdminPanel: Returning all students (no filter)');
+      console.log('AdminPanel: All students data:', allStudents.map(s => ({ 
+        name: s.name, 
+        semester: s.semester, 
+        semesterType: typeof s.semester,
+        year: s.year 
+      })));
       return allStudents;
     }
     
@@ -715,7 +721,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                               </div>
                               <div className="text-sm text-gray-500">
                                 <p>{studentItem.department}</p>
-                                <p>{studentItem.year === 2 ? '2nd' : '3rd'} Year</p>
+                                <p>{studentItem.year === 2 ? '2nd' : studentItem.year === 3 ? '3rd' : studentItem.year === 4 ? '4th' : `${studentItem.year}th`} Year</p>
                               </div>
                             </div>
                           ))}
@@ -741,7 +747,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                                 <td className="border-b border-gray-100 px-2 sm:px-4 py-2 font-mono text-xs sm:text-sm">{studentItem.register_number}</td>
                                 <td className="border-b border-gray-100 px-2 sm:px-4 py-2 text-xs sm:text-sm hidden md:table-cell">{studentItem.department}</td>
                                 <td className="border-b border-gray-100 px-2 sm:px-4 py-2 text-xs sm:text-sm">
-                                  {studentItem.year === 2 ? '2nd' : '3rd'} Year
+                                  {studentItem.year === 2 ? '2nd' : studentItem.year === 3 ? '3rd' : studentItem.year === 4 ? '4th' : `${studentItem.year}th`} Year
                                 </td>
                                 <td className="border-b border-gray-100 px-2 sm:px-4 py-2 text-center">
                                   <Button 
@@ -813,6 +819,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                       <SelectContent>
                         <SelectItem value="2">2nd Year</SelectItem>
                         <SelectItem value="3">3rd Year</SelectItem>
+                        <SelectItem value="4">4th Year</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -830,7 +837,16 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                           </>
                         )}
                         {newStudentYear === '3' && (
-                          <SelectItem value="5">5th Semester</SelectItem>
+                          <>
+                            <SelectItem value="5">5th Semester</SelectItem>
+                            <SelectItem value="6">6th Semester</SelectItem>
+                          </>
+                        )}
+                        {newStudentYear === '4' && (
+                          <>
+                            <SelectItem value="7">7th Semester</SelectItem>
+                            <SelectItem value="8">8th Semester</SelectItem>
+                          </>
                         )}
                       </SelectContent>
                     </Select>
@@ -866,7 +882,7 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
             <CardHeader>
               <CardTitle>Student: {student.name} ({student.register_number})</CardTitle>
               <p className="text-muted-foreground">
-                Year: {student.year === 2 ? '2nd' : '3rd'} 
+                Year: {student.year === 2 ? '2nd' : student.year === 3 ? '3rd' : student.year === 4 ? '4th' : `${student.year}th`} 
                 {student.semester && ` | Semester: ${student.semester}`}
               </p>
             </CardHeader>
