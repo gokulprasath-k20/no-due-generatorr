@@ -573,8 +573,10 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
                           ) : ''}
                         </td>
                         <td className="border border-gray-400 px-2 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 text-center text-black min-w-[100px] sm:min-w-[120px] md:min-w-[140px]">
-                          {mark?.signed ? '' : (
-                            <span className="text-red-500 font-bold">X</span>
+                          {getDueStatusForSubject(subject, mark) === 'Completed' ? '' : (
+                            mark?.signed ? '' : (
+                              <span className="text-red-500 font-bold">X</span>
+                            )
                           )}
                         </td>
                       </tr>
