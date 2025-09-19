@@ -282,31 +282,32 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
     return mark.assignmentSubmitted && mark.departmentFine === 0 ? 'Completed' : 'Pending';
   };
 
-  // Get average mark value across all academic subjects
-  const getAverageMarkValue = (studentId: string, field: 'iat1' | 'iat2' | 'model'): string => {
+  // Get mark value for selected subject only
+  const getSubjectMarkValue = (studentId: string, field: 'iat1' | 'iat2' | 'model'): string => {
     const student = studentsWithMarks.find(s => s.id === studentId);
     if (!student) return '';
     
-    const academicSubjects = subjects.filter(subject => shouldShowMarksColumns(subject));
-    const marks = academicSubjects.map(subject => {
-      const mark = student.marks.find(m => m.subject === subject);
-      return mark?.[field];
-    }).filter(value => value !== null && value !== undefined);
+    // If no specific subject selected, return empty
+    if (selectedSubject === 'all') return '';
     
-    if (marks.length === 0) return '';
-    
-    const average = marks.reduce((sum, mark) => sum + (mark as number), 0) / marks.length;
-    return Math.round(average).toString();
+    const mark = student.marks.find(m => m.subject === selectedSubject);
+    const value = mark?.[field];
+    return value !== null && value !== undefined ? value.toString() : '';
   };
 
-  // Update marks for all academic subjects
-  const updateAllSubjectMarks = (studentId: string, field: 'iat1' | 'iat2' | 'model', value: string) => {
-    const numValue = value === '' ? null : parseInt(value);
-    const academicSubjects = subjects.filter(subject => shouldShowMarksColumns(subject));
+  // Update marks for selected subject only
+  const updateSubjectMark = (studentId: string, field: 'iat1' | 'iat2' | 'model', value: string) => {
+    // Only update if a specific subject is selected
+    if (selectedSubject === 'all') {
+      toast({
+        title: "Select Subject",
+        description: "Please select a specific subject to enter marks",
+        variant: "destructive"
+      });
+      return;
+    }
     
-    academicSubjects.forEach(subject => {
-      updateMark(studentId, subject, field, value);
-    });
+    updateMark(studentId, selectedSubject, field, value);
   };
 
   // Get overall assignment status
@@ -375,8 +376,17 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
     return allCompleted ? 'Completed' : 'Pending';
   };
 
-  // Save all changes
+  // Save changes for selected subject only
   const saveAllChanges = async () => {
+    if (selectedSubject === 'all') {
+      toast({
+        title: "Select Subject",
+        description: "Please select a specific subject to save marks",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setSaving(true);
     try {
       let successCount = 0;
@@ -384,42 +394,37 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
 
       for (const student of studentsWithMarks) {
         try {
-          console.log(`[DEBUG] Saving marks for student: ${student.name} (${student.id})`);
+          console.log(`[DEBUG] Saving marks for student: ${student.name} (${student.id}) - Subject: ${selectedSubject}`);
           
-          // Ensure we have marks for all subjects in the semester
-          const allSubjectsForSemester = subjects;
-          const marksToSave = [];
+          // Find existing mark for selected subject or create a new one
+          let existingMark = student.marks.find(m => m.subject === selectedSubject);
           
-          for (const subject of allSubjectsForSemester) {
-            // Find existing mark or create a new one
-            let existingMark = student.marks.find(m => m.subject === subject);
-            
-            if (!existingMark) {
-              // Create a default mark entry for this subject
-              existingMark = {
-                id: '',
-                student_id: student.id,
-                subject: subject,
-                iat1: null,
-                iat2: null,
-                model: null,
-                signed: false,
-                assignmentSubmitted: false,
-                departmentFine: 0,
-                created_at: new Date().toISOString()
-              };
-            }
-            
-            marksToSave.push({
-              subject: existingMark.subject,
-              iat1: existingMark.iat1,
-              iat2: existingMark.iat2,
-              model: existingMark.model,
-              signed: existingMark.signed,
-              departmentFine: existingMark.departmentFine ?? 0,
-              assignmentSubmitted: existingMark.assignmentSubmitted ?? false
-            });
+          if (!existingMark) {
+            // Create a default mark entry for this subject
+            existingMark = {
+              id: '',
+              student_id: student.id,
+              subject: selectedSubject,
+              iat1: null,
+              iat2: null,
+              model: null,
+              signed: false,
+              assignmentSubmitted: false,
+              departmentFine: 0,
+              created_at: new Date().toISOString()
+            };
           }
+          
+          // Only save marks for the selected subject
+          const marksToSave = [{
+            subject: existingMark.subject,
+            iat1: existingMark.iat1,
+            iat2: existingMark.iat2,
+            model: existingMark.model,
+            signed: existingMark.signed,
+            departmentFine: existingMark.departmentFine ?? 0,
+            assignmentSubmitted: existingMark.assignmentSubmitted ?? false
+          }];
 
           console.log(`[DEBUG] Marks to save for ${student.name}:`, marksToSave);
           await api.updateMarks(student.id, marksToSave);
@@ -436,7 +441,7 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
       if (errorCount === 0) {
         toast({
           title: "Success",
-          description: `Successfully saved changes for all ${successCount} students`,
+          description: `Successfully saved ${selectedSubject} marks for all ${successCount} students`,
         });
       } else {
         toast({
@@ -466,22 +471,66 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
     return `${numStr}th`;
   };
 
-  // Handle Enter key navigation
+  // Handle keyboard navigation (Enter, Arrow keys)
   const handleKeyDown = (e: React.KeyboardEvent, currentKey: string) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      
-      // Find all input keys and sort them to determine next input
-      const allKeys = Object.keys(inputRefs.current).sort();
-      const currentIndex = allKeys.indexOf(currentKey);
-      
-      if (currentIndex < allKeys.length - 1) {
-        const nextKey = allKeys[currentIndex + 1];
-        const nextInput = inputRefs.current[nextKey];
-        if (nextInput) {
-          nextInput.focus();
-          nextInput.select();
+    const allKeys = Object.keys(inputRefs.current).sort();
+    const currentIndex = allKeys.indexOf(currentKey);
+    
+    let targetIndex = -1;
+    
+    switch (e.key) {
+      case 'Enter':
+      case 'ArrowDown':
+        e.preventDefault();
+        // Move to next input (down)
+        targetIndex = currentIndex < allKeys.length - 1 ? currentIndex + 1 : 0;
+        break;
+        
+      case 'ArrowUp':
+        e.preventDefault();
+        // Move to previous input (up)
+        targetIndex = currentIndex > 0 ? currentIndex - 1 : allKeys.length - 1;
+        break;
+        
+      case 'ArrowRight':
+        e.preventDefault();
+        // Move to next field in same row
+        const currentStudentId = currentKey.split('-')[0];
+        const currentField = currentKey.split('-')[1];
+        const fields = ['iat1', 'iat2', 'model'];
+        const fieldIndex = fields.indexOf(currentField);
+        if (fieldIndex < fields.length - 1) {
+          const nextField = fields[fieldIndex + 1];
+          const nextKey = `${currentStudentId}-${nextField}`;
+          if (inputRefs.current[nextKey]) {
+            targetIndex = allKeys.indexOf(nextKey);
+          }
         }
+        break;
+        
+      case 'ArrowLeft':
+        e.preventDefault();
+        // Move to previous field in same row
+        const currentStudentIdLeft = currentKey.split('-')[0];
+        const currentFieldLeft = currentKey.split('-')[1];
+        const fieldsLeft = ['iat1', 'iat2', 'model'];
+        const fieldIndexLeft = fieldsLeft.indexOf(currentFieldLeft);
+        if (fieldIndexLeft > 0) {
+          const prevField = fieldsLeft[fieldIndexLeft - 1];
+          const prevKey = `${currentStudentIdLeft}-${prevField}`;
+          if (inputRefs.current[prevKey]) {
+            targetIndex = allKeys.indexOf(prevKey);
+          }
+        }
+        break;
+    }
+    
+    if (targetIndex >= 0 && targetIndex < allKeys.length) {
+      const targetKey = allKeys[targetIndex];
+      const targetInput = inputRefs.current[targetKey];
+      if (targetInput) {
+        targetInput.focus();
+        targetInput.select();
       }
     }
   };
@@ -621,7 +670,7 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
                         {student.register_number}
                       </td>
                       
-                      {/* IAT1 - Average of all academic subjects */}
+                      {/* IAT1 - For selected subject only */}
                       <td className="border border-gray-300 px-4 py-3 text-center">
                         <Input
                           ref={(el) => {
@@ -631,15 +680,16 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
                           type="number"
                           min="0"
                           max="100"
-                          value={getAverageMarkValue(student.id, 'iat1')}
-                          onChange={(e) => updateAllSubjectMarks(student.id, 'iat1', e.target.value)}
+                          value={getSubjectMarkValue(student.id, 'iat1')}
+                          onChange={(e) => updateSubjectMark(student.id, 'iat1', e.target.value)}
                           onKeyDown={(e) => handleKeyDown(e, getInputKey(student.id, 'iat1'))}
                           className="w-16 h-8 text-center text-sm"
                           placeholder="0"
+                          disabled={selectedSubject === 'all'}
                         />
                       </td>
                       
-                      {/* IAT2 - Average of all academic subjects */}
+                      {/* IAT2 - For selected subject only */}
                       <td className="border border-gray-300 px-4 py-3 text-center">
                         <Input
                           ref={(el) => {
@@ -649,15 +699,16 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
                           type="number"
                           min="0"
                           max="100"
-                          value={getAverageMarkValue(student.id, 'iat2')}
-                          onChange={(e) => updateAllSubjectMarks(student.id, 'iat2', e.target.value)}
+                          value={getSubjectMarkValue(student.id, 'iat2')}
+                          onChange={(e) => updateSubjectMark(student.id, 'iat2', e.target.value)}
                           onKeyDown={(e) => handleKeyDown(e, getInputKey(student.id, 'iat2'))}
                           className="w-16 h-8 text-center text-sm"
                           placeholder="0"
+                          disabled={selectedSubject === 'all'}
                         />
                       </td>
                       
-                      {/* MODEL - Average of all academic subjects */}
+                      {/* MODEL - For selected subject only */}
                       <td className="border border-gray-300 px-4 py-3 text-center">
                         <Input
                           ref={(el) => {
@@ -667,11 +718,12 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
                           type="number"
                           min="0"
                           max="100"
-                          value={getAverageMarkValue(student.id, 'model')}
-                          onChange={(e) => updateAllSubjectMarks(student.id, 'model', e.target.value)}
+                          value={getSubjectMarkValue(student.id, 'model')}
+                          onChange={(e) => updateSubjectMark(student.id, 'model', e.target.value)}
                           onKeyDown={(e) => handleKeyDown(e, getInputKey(student.id, 'model'))}
                           className="w-16 h-8 text-center text-sm"
                           placeholder="0"
+                          disabled={selectedSubject === 'all'}
                         />
                       </td>
                       

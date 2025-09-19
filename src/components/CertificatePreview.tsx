@@ -559,21 +559,17 @@ export function CertificatePreview({ student, marks, onBack, onRefresh }: Certif
                         </td>
                         <td className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center text-black">
                           {config.showAssignment ? (
-                            mark?.assignmentSubmitted ? 'Submitted' : (
-                              <span className="text-red-500 font-bold">X</span>
-                            )
+                            mark?.assignmentSubmitted ? 'Submitted' : 'Not Submitted'
                           ) : ''}
                         </td>
                         <td className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center text-black">
                           {config.showDepartmentFees ? (
-                            mark?.departmentFine === 0 ? 'Paid' : 'Unpaid'
+                            mark?.departmentFine === 0 ? 'Paid' : 'Pending'
                           ) : ''}
                         </td>
                         <td className="border border-gray-400 px-1 sm:px-2 md:px-3 py-2 sm:py-3 text-center text-black">
                           {config.showDueStatus ? (
-                            getDueStatusForSubject(subject, mark) === 'Completed' ? 'Completed' : (
-                              <span className="text-red-500 font-bold">X</span>
-                            )
+                            getDueStatusForSubject(subject, mark) === 'Completed' ? 'Completed' : 'Pending'
                           ) : ''}
                         </td>
                         <td className="border border-gray-400 px-2 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 text-center text-black min-w-[100px] sm:min-w-[120px] md:min-w-[140px]">
