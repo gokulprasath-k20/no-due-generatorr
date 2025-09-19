@@ -65,14 +65,25 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
             register_number: student.register_number,
             semester: student.semester,
             semesterType: typeof student.semester,
+            semesterValue: JSON.stringify(student.semester),
+            semesterParsed: typeof student.semester === 'string' ? parseInt(student.semester) : student.semester,
             year: student.year,
             department: student.department
           });
         });
         
         console.log('AdminPanel: Students by semester count:', semesterCounts);
-        console.log('AdminPanel: 3rd semester students specifically:', 
+        console.log('AdminPanel: 3rd semester students (number check):', 
           students.filter(s => s.semester === 3).map(s => ({ name: s.name, semester: s.semester }))
+        );
+        console.log('AdminPanel: 3rd semester students (string check):', 
+          students.filter(s => String(s.semester) === '3').map(s => ({ name: s.name, semester: s.semester }))
+        );
+        console.log('AdminPanel: 3rd semester students (parsed check):', 
+          students.filter(s => {
+            const parsed = typeof s.semester === 'string' ? parseInt(s.semester) : s.semester;
+            return parsed === 3;
+          }).map(s => ({ name: s.name, semester: s.semester, parsed: typeof s.semester === 'string' ? parseInt(s.semester) : s.semester }))
         );
       } else {
         console.log('AdminPanel: No students found in database');
@@ -474,21 +485,32 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
     console.log('AdminPanel: Filtering for semester number:', semesterNumber, 'type:', typeof semesterNumber);
     
     const filtered = allStudents.filter(student => {
-      // Handle both string and number semester values
-      const studentSemester = typeof student.semester === 'string' ? parseInt(student.semester) : student.semester;
+      // Handle both string and number semester values, including null/undefined
+      let studentSemester: number | null = null;
+      
+      if (student.semester !== null && student.semester !== undefined) {
+        if (typeof student.semester === 'string') {
+          const parsed = parseInt(student.semester);
+          studentSemester = isNaN(parsed) ? null : parsed;
+        } else if (typeof student.semester === 'number') {
+          studentSemester = student.semester;
+        }
+      }
+      
       const matches = studentSemester === semesterNumber;
       
-      if (!matches && (studentSemester === 3)) {
-        console.log('AdminPanel: 3rd semester student not matching filter:', {
+      // Debug logging for 3rd semester students
+      if (studentSemester === 3 || String(student.semester) === '3') {
+        console.log('AdminPanel: 3rd semester student filtering:', {
           studentName: student.name,
-          studentSemester: student.semester,
-          studentSemesterParsed: studentSemester,
-          studentSemesterType: typeof student.semester,
+          originalSemester: student.semester,
+          originalType: typeof student.semester,
+          parsedSemester: studentSemester,
           filterSemester: semesterNumber,
-          filterSemesterType: typeof semesterNumber,
-          matches
+          matches: matches
         });
       }
+      
       return matches;
     });
     
@@ -622,9 +644,19 @@ export function AdminPanel({ onLogout }: AdminPanelProps) {
                   
                   const studentsBySemester = filteredStudents.reduce((acc, student) => {
                     // Handle both string and number semester values for grouping
-                    const semesterValue = typeof student.semester === 'string' ? parseInt(student.semester) : student.semester;
+                    let semesterValue: number | null = null;
+                    
+                    if (student.semester !== null && student.semester !== undefined) {
+                      if (typeof student.semester === 'string') {
+                        const parsed = parseInt(student.semester);
+                        semesterValue = isNaN(parsed) ? null : parsed;
+                      } else if (typeof student.semester === 'number') {
+                        semesterValue = student.semester;
+                      }
+                    }
+                    
                     const semesterKey = semesterValue ? `${semesterValue}th Semester` : 'No Semester';
-                    console.log('AdminPanel: Grouping student:', student.name, 'with semester key:', semesterKey, 'original semester:', student.semester);
+                    console.log('AdminPanel: Grouping student:', student.name, 'with semester key:', semesterKey, 'original semester:', student.semester, 'parsed:', semesterValue);
                     
                     if (!acc[semesterKey]) {
                       acc[semesterKey] = [];
