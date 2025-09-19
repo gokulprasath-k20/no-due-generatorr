@@ -324,12 +324,18 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
     return submittedCount === academicSubjects.length ? 'submitted' : 'not-submitted';
   };
 
-  // Update assignment submission for all academic subjects
-  const updateAllAssignmentSubmissions = (studentId: string, submitted: boolean) => {
-    const academicSubjects = subjects.filter(subject => shouldShowMarksColumns(subject));
-    academicSubjects.forEach(subject => {
-      updateAssignmentSubmission(studentId, subject, submitted);
-    });
+  // Update assignment submission for selected subject only
+  const updateSelectedSubjectAssignmentSubmission = (studentId: string, submitted: boolean) => {
+    if (selectedSubject === 'all') {
+      toast({
+        title: "Select Subject",
+        description: "Please select a specific subject to update assignment submission",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    updateAssignmentSubmission(studentId, selectedSubject, submitted);
   };
 
   // Get overall department fees status
@@ -346,12 +352,63 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
     return paidCount === academicSubjects.length;
   };
 
-  // Update department fees for all academic subjects
-  const updateAllDepartmentFees = (studentId: string, isPaid: boolean) => {
-    const academicSubjects = subjects.filter(subject => shouldShowMarksColumns(subject));
-    academicSubjects.forEach(subject => {
-      updateDepartmentFees(studentId, subject, isPaid);
-    });
+  // Update department fees for selected subject only
+  const updateSelectedSubjectDepartmentFees = (studentId: string, isPaid: boolean) => {
+    if (selectedSubject === 'all') {
+      toast({
+        title: "Select Subject",
+        description: "Please select a specific subject to update department fees",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const feeAmount = isPaid ? 0 : 100; // 0 means paid, >0 means unpaid
+    updateDepartmentFees(studentId, selectedSubject, feeAmount);
+  };
+
+  // Get assignment submission status for selected subject
+  const getSelectedSubjectAssignmentStatus = (studentId: string): string => {
+    if (selectedSubject === 'all') return 'not-submitted';
+    
+    const student = studentsWithMarks.find(s => s.id === studentId);
+    if (!student) return 'not-submitted';
+    
+    const mark = student.marks.find(m => m.subject === selectedSubject);
+    return mark?.assignmentSubmitted ? 'submitted' : 'not-submitted';
+  };
+
+  // Get department fees status for selected subject
+  const getSelectedSubjectDepartmentFeesStatus = (studentId: string): boolean => {
+    if (selectedSubject === 'all') return false;
+    
+    const student = studentsWithMarks.find(s => s.id === studentId);
+    if (!student) return false;
+    
+    const mark = student.marks.find(m => m.subject === selectedSubject);
+    return (mark?.departmentFine ?? 100) === 0; // 0 means paid
+  };
+
+  // Get overall status for selected subject (Completed if both assignment submitted and fees paid)
+  const getSelectedSubjectOverallStatus = (studentId: string): 'Completed' | 'Pending' => {
+    if (selectedSubject === 'all') return 'Pending';
+    
+    const student = studentsWithMarks.find(s => s.id === studentId);
+    if (!student) return 'Pending';
+    
+    const mark = student.marks.find(m => m.subject === selectedSubject);
+    if (!mark) return 'Pending';
+    
+    // For Office and Library, only check signature
+    if (selectedSubject === 'Office' || selectedSubject === 'Library') {
+      return mark.signed ? 'Completed' : 'Pending';
+    }
+    
+    // For academic subjects, check both assignment submission and department fees
+    const assignmentSubmitted = mark.assignmentSubmitted;
+    const feesPaid = (mark.departmentFine ?? 100) === 0;
+    
+    return assignmentSubmitted && feesPaid ? 'Completed' : 'Pending';
   };
 
   // Get overall status
@@ -727,14 +784,15 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
                         />
                       </td>
                       
-                      {/* Assignment Submission */}
+                      {/* Assignment Submission - For Selected Subject */}
                       <td className="border border-gray-300 px-4 py-3 text-center">
                         <Select
-                          value={getOverallAssignmentStatus(student.id)}
+                          value={getSelectedSubjectAssignmentStatus(student.id)}
                           onValueChange={(value) => {
                             const isSubmitted = value === 'submitted';
-                            updateAllAssignmentSubmissions(student.id, isSubmitted);
+                            updateSelectedSubjectAssignmentSubmission(student.id, isSubmitted);
                           }}
+                          disabled={selectedSubject === 'all'}
                         >
                           <SelectTrigger className="w-32 h-8 text-sm">
                             <SelectValue />
@@ -746,14 +804,15 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
                         </Select>
                       </td>
                       
-                      {/* Departmental Fees */}
+                      {/* Departmental Fees - For Selected Subject */}
                       <td className="border border-gray-300 px-4 py-3 text-center">
                         <Select
-                          value={getOverallDepartmentFeesStatus(student.id) ? 'paid' : 'pending'}
+                          value={getSelectedSubjectDepartmentFeesStatus(student.id) ? 'paid' : 'pending'}
                           onValueChange={(value) => {
                             const isPaid = value === 'paid';
-                            updateAllDepartmentFees(student.id, isPaid);
+                            updateSelectedSubjectDepartmentFees(student.id, isPaid);
                           }}
+                          disabled={selectedSubject === 'all'}
                         >
                           <SelectTrigger className="w-24 h-8 text-sm">
                             <SelectValue />
@@ -765,14 +824,14 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
                         </Select>
                       </td>
                       
-                      {/* Overall Status */}
+                      {/* Overall Status - For Selected Subject */}
                       <td className="border border-gray-300 px-4 py-3 text-center">
                         <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium ${
-                          getOverallStatus(student.id) === 'Completed' 
+                          getSelectedSubjectOverallStatus(student.id) === 'Completed' 
                             ? 'bg-green-100 text-green-800 border border-green-200' 
                             : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
                         }`}>
-                          {getOverallStatus(student.id)}
+                          {getSelectedSubjectOverallStatus(student.id)}
                         </span>
                       </td>
                     </tr>
