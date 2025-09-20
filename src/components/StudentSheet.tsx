@@ -771,7 +771,7 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
                           value={getSubjectMarkValue(student.id, 'iat1')}
                           onChange={(e) => updateSubjectMark(student.id, 'iat1', e.target.value)}
                           onKeyDown={(e) => handleKeyDown(e, getInputKey(student.id, 'iat1'))}
-                          className="w-16 h-8 text-center text-sm"
+                          className="w-16 h-8 text-center text-sm [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                           placeholder="0"
                           disabled={selectedSubject === 'all'}
                         />
@@ -790,7 +790,7 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
                           value={getSubjectMarkValue(student.id, 'iat2')}
                           onChange={(e) => updateSubjectMark(student.id, 'iat2', e.target.value)}
                           onKeyDown={(e) => handleKeyDown(e, getInputKey(student.id, 'iat2'))}
-                          className="w-16 h-8 text-center text-sm"
+                          className="w-16 h-8 text-center text-sm [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                           placeholder="0"
                           disabled={selectedSubject === 'all'}
                         />
@@ -809,7 +809,7 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
                           value={getSubjectMarkValue(student.id, 'model')}
                           onChange={(e) => updateSubjectMark(student.id, 'model', e.target.value)}
                           onKeyDown={(e) => handleKeyDown(e, getInputKey(student.id, 'model'))}
-                          className="w-16 h-8 text-center text-sm"
+                          className="w-16 h-8 text-center text-sm [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                           placeholder="0"
                           disabled={selectedSubject === 'all'}
                         />
