@@ -363,8 +363,7 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
       return;
     }
     
-    const feeAmount = isPaid ? 0 : 100; // 0 means paid, >0 means unpaid
-    updateDepartmentFees(studentId, selectedSubject, feeAmount);
+    updateDepartmentFees(studentId, selectedSubject, isPaid);
   };
 
   // Get assignment submission status for selected subject
@@ -532,10 +531,14 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
   const handleKeyDown = (e: React.KeyboardEvent, currentKey: string) => {
     const [currentStudentId, currentField] = currentKey.split('-');
     const students = studentsWithMarks;
-    const fields = ['iat1', 'iat2', 'model', 'assignment', 'fees'];
+    // Only include input fields for navigation (IAT1, IAT2, MODEL only)
+    const fields = ['iat1', 'iat2', 'model'];
     
     const currentStudentIndex = students.findIndex(s => s.id === currentStudentId);
     const currentFieldIndex = fields.indexOf(currentField);
+    
+    // Skip navigation if current field is not in our navigation fields
+    if (currentFieldIndex === -1) return;
     
     let targetStudentIndex = currentStudentIndex;
     let targetFieldIndex = currentFieldIndex;
@@ -545,16 +548,28 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
       case 'ArrowDown':
         e.preventDefault();
         // Move to same field in next student (downward)
-        targetStudentIndex = currentStudentIndex < students.length - 1 ? currentStudentIndex + 1 : 0;
+        if (currentStudentIndex < students.length - 1) {
+          targetStudentIndex = currentStudentIndex + 1;
+        } else {
+          // If at last student, wrap to first student
+          targetStudentIndex = 0;
+        }
         break;
         
       case 'ArrowUp':
         e.preventDefault();
         // Move to same field in previous student (upward)
-        targetStudentIndex = currentStudentIndex > 0 ? currentStudentIndex - 1 : students.length - 1;
+        if (currentStudentIndex > 0) {
+          targetStudentIndex = currentStudentIndex - 1;
+        } else {
+          // If at first student, wrap to last student
+          targetStudentIndex = students.length - 1;
+        }
         break;
         
       case 'ArrowRight':
+      case 'Tab':
+        if (e.key === 'Tab' && e.shiftKey) return; // Let shift+tab work normally
         e.preventDefault();
         // Move to next field in same student (rightward)
         if (currentFieldIndex < fields.length - 1) {
@@ -562,7 +577,11 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
         } else {
           // If at last field, move to first field of next student
           targetFieldIndex = 0;
-          targetStudentIndex = currentStudentIndex < students.length - 1 ? currentStudentIndex + 1 : 0;
+          if (currentStudentIndex < students.length - 1) {
+            targetStudentIndex = currentStudentIndex + 1;
+          } else {
+            targetStudentIndex = 0; // Wrap to first student
+          }
         }
         break;
         
@@ -574,7 +593,11 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
         } else {
           // If at first field, move to last field of previous student
           targetFieldIndex = fields.length - 1;
-          targetStudentIndex = currentStudentIndex > 0 ? currentStudentIndex - 1 : students.length - 1;
+          if (currentStudentIndex > 0) {
+            targetStudentIndex = currentStudentIndex - 1;
+          } else {
+            targetStudentIndex = students.length - 1; // Wrap to last student
+          }
         }
         break;
         
@@ -589,11 +612,14 @@ export function StudentSheet({ allStudents, onRefresh, loading }: StudentSheetPr
     const targetElement = inputRefs.current[targetKey];
     
     if (targetElement && !(targetElement as any).disabled) {
-      targetElement.focus();
-      // Only call select() if it's an input element
-      if ('select' in targetElement && typeof (targetElement as any).select === 'function') {
-        (targetElement as HTMLInputElement).select();
-      }
+      // Small delay to ensure proper focus
+      setTimeout(() => {
+        targetElement.focus();
+        // Select all text in the input for easy replacement
+        if ('select' in targetElement && typeof (targetElement as any).select === 'function') {
+          (targetElement as HTMLInputElement).select();
+        }
+      }, 0);
     }
   };
 
